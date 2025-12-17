@@ -77,12 +77,12 @@ function formatOutput(stats: Statistics, distribution: Map<number, number>): voi
   // The story - setup and results
   console.log('\n--- The Story ---');
   console.log(
-    `Imagine ${stats.count.toLocaleString()} joueurs, chacun avec un sac contenant ` +
-    `${TOTAL_BALLS} boules: ${config.redBalls} rouges et ${config.blueBalls} bleue(s).`
+    `Imagine un sac contenant ${TOTAL_BALLS} boules: ${config.redBalls} rouges et ` +
+    `${config.blueBalls} bleue(s). ${stats.count.toLocaleString()} joueurs vont tenter leur chance.`
   );
   console.log(
-    `Chaque joueur pioche une boule au hasard, la remet dans le sac, et recommence ` +
-    `jusqu'a tomber sur une boule bleue.`
+    `Chacun pioche une boule au hasard, la remet dans le sac, et recommence ` +
+    `jusqu'a tomber sur la boule bleue.`
   );
   console.log(`La probabilite de succes a chaque tirage est de 1/${TOTAL_BALLS}.\n`);
 
@@ -111,6 +111,23 @@ function formatOutput(stats: Statistics, distribution: Map<number, number>): voi
   console.log(`\n50% des joueurs ont reussi en ${p50} tentatives ou moins`);
   console.log(`90% des joueurs ont reussi en ${p90.toLocaleString()} tentatives ou moins`);
   console.log(`99% des joueurs ont reussi en ${p99.toLocaleString()} tentatives ou moins`);
+
+  // The moral
+  console.log('\n--- Ce que ca nous apprend ---');
+  console.log(
+    `Meme avec une probabilite de 1/${TOTAL_BALLS}, 100% des joueurs finissent par reussir.`
+  );
+  console.log(
+    `La perseverance bat toujours les statistiques: le malchanceux a ${stats.max.toLocaleString()} ` +
+    `tentatives a quand meme gagne, comme tous les autres.`
+  );
+  console.log(
+    `La difference entre le chanceux (1 tentative) et le malchanceux (${stats.max.toLocaleString()}) ` +
+    `est de ${stats.max - 1}x, mais le resultat final est le meme: la victoire.`
+  );
+  console.log(
+    `\nLa chance determine le "quand", pas le "si". Celui qui persevere gagne toujours.`
+  );
 
   console.log('\n--- Statistics ---');
   console.log(`Theoretical:  ${stats.theoretical.toFixed(2)} attempts`);
