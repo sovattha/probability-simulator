@@ -125,52 +125,80 @@
     .results { display: none; }
     .results.visible { display: block; }
 
-    .story-box {
+    .info-box {
       background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
       border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 2rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
       border: 1px solid #0f3460;
     }
-    .story-box h2 { color: #e94560; margin-bottom: 1rem; }
-    .story-box p { line-height: 1.8; margin-bottom: 0.5rem; }
-    .story-box .highlight { color: #e94560; font-weight: bold; }
+    .info-box h2 { color: #e94560; margin-bottom: 1rem; font-size: 1.25rem; }
+    .info-box p { line-height: 1.7; margin-bottom: 0.5rem; font-size: 0.95rem; }
+    .info-box .highlight { color: #e94560; font-weight: bold; }
+
+    .child-box {
+      background: linear-gradient(135deg, #4a1942 0%, #16213e 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #4a1942;
+    }
+    .child-box h2 { color: #f0a6ca; margin-bottom: 1rem; font-size: 1.25rem; }
+    .child-box p { line-height: 1.8; margin-bottom: 0.5rem; font-size: 1rem; }
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
     }
     .stat-card {
       background: rgba(255,255,255,0.05);
       border-radius: 12px;
-      padding: 1.25rem;
+      padding: 1rem;
       text-align: center;
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .stat-card .value { font-size: 1.75rem; font-weight: bold; color: #e94560; }
-    .stat-card .label { color: #888; font-size: 0.8rem; margin-top: 0.25rem; }
+    .stat-card .value { font-size: 1.5rem; font-weight: bold; color: #e94560; }
+    .stat-card .label { color: #888; font-size: 0.75rem; margin-top: 0.25rem; }
     .stat-card.lucky .value { color: #4ade80; }
     .stat-card.unlucky .value { color: #f97316; }
 
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 1100px) {
+      .charts-row { grid-template-columns: 1fr; }
+    }
+
     .chart-container {
       background: rgba(255,255,255,0.05);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      border-radius: 12px;
+      padding: 1rem;
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .chart-container h3 { margin-bottom: 1rem; color: #e94560; }
+    .chart-container h3 { margin-bottom: 0.5rem; color: #e94560; font-size: 1rem; }
+    .chart-container canvas { max-height: 200px; }
+    .chart-explanation {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.85rem;
+      color: #aaa;
+      line-height: 1.5;
+    }
 
     .moral-box {
       background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
       border-radius: 16px;
-      padding: 2rem;
+      padding: 1.5rem;
       text-align: center;
     }
-    .moral-box h2 { margin-bottom: 1rem; }
-    .moral-box .quote { font-size: 1.25rem; font-style: italic; opacity: 0.95; line-height: 1.6; }
+    .moral-box h2 { margin-bottom: 0.75rem; font-size: 1.25rem; }
+    .moral-box .quote { font-size: 1.1rem; font-style: italic; opacity: 0.95; line-height: 1.6; }
 
     .progress-bar {
       width: 100%;
@@ -308,16 +336,23 @@
       </div>
 
       <div class="results" id="results">
-        <div class="story-box" id="storyBox"></div>
+        <div class="info-box" id="storyBox"></div>
         <div class="stats-grid" id="statsGrid"></div>
-        <div class="chart-container">
-          <h3>📊 Distribution des tentatives</h3>
-          <canvas id="distributionChart"></canvas>
+
+        <div class="charts-row">
+          <div class="chart-container">
+            <h3>📊 Distribution</h3>
+            <canvas id="distributionChart"></canvas>
+            <div class="chart-explanation" id="distExplanation"></div>
+          </div>
+          <div class="chart-container">
+            <h3>📈 Cumul</h3>
+            <canvas id="cumulativeChart"></canvas>
+            <div class="chart-explanation" id="cumulExplanation"></div>
+          </div>
         </div>
-        <div class="chart-container">
-          <h3>📈 Distribution cumulative</h3>
-          <canvas id="cumulativeChart"></canvas>
-        </div>
+
+        <div class="child-box" id="childBox"></div>
         <div class="moral-box" id="moralBox"></div>
       </div>
     </div>
@@ -350,17 +385,30 @@
             <p>Imagine un sac contenant <span class="highlight">${config.totalBalls} boules</span>:
                ${config.redBalls} 🔴 rouges et ${config.blueBalls} 🔵 bleue(s).</p>
             <p><span class="highlight">${config.players.toLocaleString()}</span> joueurs vont tenter leur chance.</p>
-            <p>Chacun pioche une boule au hasard, <strong>la remet dans le sac</strong>, et recommence jusqu'à tomber sur la boule bleue.</p>
-            <p>La probabilité de succès à chaque tirage est de <span class="highlight">1/${config.totalBalls}</span>.</p>
-            <br>
-            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux ont trouvé du premier coup!</p>
-            <p>😅 Le plus malchanceux a dû s'y reprendre <strong>${stats.max.toLocaleString()}</strong> fois...</p>
+            <p>Chacun pioche une boule au hasard, <strong>la remet dans le sac</strong>, et recommence jusqu'à trouver la bleue.</p>
+            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux ont trouvé du premier coup!
+               😅 Le plus malchanceux: <strong>${stats.max.toLocaleString()}</strong> tentatives.</p>
           `;
         },
+        getDistExplanation: (config, stats) => `
+          <strong>Ce graphique montre combien de joueurs ont eu besoin de X tentatives.</strong>
+          La barre la plus haute est à gauche (1 tentative) et décroît exponentiellement.
+          C'est la "distribution géométrique" - typique des jeux de hasard avec remise.
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>Ce graphique montre le % de joueurs ayant réussi en X tentatives ou moins.</strong>
+          À ${p50} tentatives, 50% ont réussi. À ${p90}, c'est 90%.
+          La courbe monte vite au début puis ralentit - les derniers % sont les plus durs!
+        `,
+        getChildExplanation: (config, stats) => `
+          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+          <p>Imagine que tu cherches une bille bleue dans un sac de ${config.totalBalls} billes. Tu pioches, tu regardes, et tu remets la bille dans le sac. Puis tu recommences!</p>
+          <p>Certains ont beaucoup de chance et trouvent tout de suite. D'autres doivent essayer plein de fois - jusqu'à ${stats.max.toLocaleString()} fois pour le moins chanceux!</p>
+          <p><strong>Mais tu sais quoi? À la fin, TOUT LE MONDE trouve la bille bleue.</strong> Il faut juste être patient! 🎉</p>
+        `,
         getMoral: (config, stats) => `
           <h2>💡 Ce que ça nous apprend</h2>
           <p class="quote">
-            ✅ Même avec une probabilité de 1/${config.totalBalls}, 100% des joueurs finissent par réussir.<br><br>
             🎯 La chance détermine le "quand", pas le "si".<br>
             <strong>Celui qui persévère gagne toujours.</strong>
           </p>
@@ -371,22 +419,33 @@
           const luckyCount = dist.get(1) || 0;
           return `
             <h2>📖 L'Histoire</h2>
-            <p>Imagine un sac contenant <span class="highlight">${config.totalBalls} boules</span>:
-               ${config.redBalls} 🔴 rouges et ${config.blueBalls} 🔵 bleue(s).</p>
-            <p><span class="highlight">${config.players.toLocaleString()}</span> joueurs vont tenter leur chance.</p>
-            <p>Chacun pioche une boule au hasard et <strong>la garde</strong>. La probabilité augmente à chaque tirage!</p>
-            <p>Au pire, il reste ${config.blueBalls} boule(s) après ${config.redBalls} tirages.</p>
-            <br>
-            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux ont trouvé du premier coup!</p>
-            <p>😅 Le plus malchanceux a eu besoin de <strong>${stats.max.toLocaleString()}</strong> tentatives (max: ${config.totalBalls})</p>
+            <p>Même sac de <span class="highlight">${config.totalBalls} boules</span>, mais cette fois on <strong>garde</strong> chaque boule piochée!</p>
+            <p>La probabilité augmente à chaque tirage. Maximum ${config.totalBalls} tentatives possible.</p>
+            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux au 1er coup!
+               😅 Le plus malchanceux: <strong>${stats.max}</strong>/${config.totalBalls} tentatives.</p>
           `;
         },
+        getDistExplanation: (config, stats) => `
+          <strong>Distribution plus "plate" qu'avec remise.</strong>
+          Chaque nombre de tentatives a presque la même probabilité!
+          C'est la "distribution uniforme" - chaque position dans le sac est équiprobable.
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>Ligne presque droite = progression régulière.</strong>
+          À ${p50} tentatives, 50% ont réussi. La médiane est proche de ${config.totalBalls}/2.
+          Contrairement au mode "avec remise", pas de longue traîne!
+        `,
+        getChildExplanation: (config, stats) => `
+          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+          <p>Cette fois, quand tu pioches une bille rouge, tu la gardes au lieu de la remettre!</p>
+          <p>C'est comme si le sac devenait de plus en plus petit. Au bout d'un moment, il ne reste que la bille bleue!</p>
+          <p><strong>Le plus malchanceux a dû vider presque tout le sac (${stats.max} billes), mais au moins il y a une limite!</strong> C'est plus "juste" 🤗</p>
+        `,
         getMoral: (config, stats) => `
           <h2>💡 Ce que ça nous apprend</h2>
           <p class="quote">
-            ✅ Sans remise, la victoire est GARANTIE en ${config.totalBalls} tentatives maximum.<br><br>
-            📈 La probabilité augmente à chaque échec.<br>
-            <strong>Le système est plus "juste" - même le malchanceux a une limite.</strong>
+            ✅ Sans remise, victoire GARANTIE en ${config.totalBalls} essais max.<br>
+            <strong>Le système protège contre la malchance extrême.</strong>
           </p>
         `
       },
@@ -394,23 +453,34 @@
         getStory: (config, stats, dist) => {
           const luckyCount = dist.get(1) || 0;
           return `
-            <h2>📖 L'Histoire - Pity System (Gacha)</h2>
-            <p>Comme dans les jeux mobiles! La probabilité de base est <span class="highlight">1/${config.totalBalls}</span>.</p>
-            <p>Mais après <strong>${config.pityStart}</strong> échecs, elle augmente progressivement...</p>
-            <p>Et à <strong>${config.pityGuarantee}</strong> tentatives, c'est <span class="highlight">GARANTI</span>! 🎰</p>
-            <br>
-            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> ont eu de la chance naturelle (1er coup)</p>
-            <p>😅 Le moins chanceux a atteint <strong>${stats.max.toLocaleString()}</strong> tentatives</p>
-            <p>📊 Mais personne ne dépasse ${config.pityGuarantee}!</p>
+            <h2>📖 L'Histoire - Système Pity (Gacha)</h2>
+            <p>Probabilité de base: <span class="highlight">1/${config.totalBalls}</span>.
+               Après <strong>${config.pityStart}</strong> échecs, elle augmente!</p>
+            <p>À <strong>${config.pityGuarantee}</strong> tentatives = <span class="highlight">100% GARANTI</span> 🎰</p>
+            <p>🍀 ${luckyCount.toLocaleString()} chanceux naturels | 😅 Max: ${stats.max} (≤${config.pityGuarantee})</p>
           `;
         },
+        getDistExplanation: (config, stats) => `
+          <strong>Pic vers la fin = joueurs "sauvés" par le pity.</strong>
+          Beaucoup de gens arrivent près de la garantie avant de gagner.
+          C'est calculé pour maximiser les dépenses tout en évitant la frustration totale.
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>La courbe accélère vers la fin!</strong>
+          Contrairement au mode normal, 100% est atteint à exactement ${config.pityGuarantee} tentatives.
+          Le pity "rattrape" tous les malchanceux.
+        `,
+        getChildExplanation: (config, stats) => `
+          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+          <p>C'est comme dans les jeux sur téléphone! Au début c'est dur de gagner...</p>
+          <p>Mais si tu n'as vraiment pas de chance, le jeu devient plus gentil et te laisse gagner après ${config.pityGuarantee} essais!</p>
+          <p><strong>Attention:</strong> Les créateurs du jeu ont calculé ça pour que tu aies ENVIE de continuer à jouer (et payer) 💸</p>
+        `,
         getMoral: (config, stats) => `
           <h2>💡 Ce que ça nous apprend</h2>
           <p class="quote">
-            🎰 Le Pity System donne une <strong>illusion de contrôle</strong>.<br><br>
-            Les joueurs pensent "je suis proche de la garantie!" et continuent à payer.<br>
-            C'est un mécanisme psychologique puissant utilisé par les jeux gacha.<br><br>
-            <strong>La maison gagne toujours, mais le joueur se sent "protégé".</strong>
+            🎰 Le Pity donne une <strong>illusion de protection</strong>.<br>
+            <strong>C'est un outil marketing, pas un cadeau.</strong>
           </p>
         `
       },
@@ -419,64 +489,106 @@
           const winsByPosition = config.winsByPosition || [];
           return `
             <h2>📖 L'Histoire - Compétition</h2>
-            <p><strong>${config.playersPerGame}</strong> joueurs s'affrontent autour du même sac.</p>
-            <p>Ils piochent à tour de rôle (sans remise). Le premier à trouver la 🔵 gagne!</p>
-            <p>${config.games.toLocaleString()} parties ont été jouées.</p>
-            <br>
-            <p>🥇 Joueur 1 a gagné <strong>${((winsByPosition[0] || 0) / config.games * 100).toFixed(1)}%</strong> des parties</p>
-            <p>🥈 Joueur 2: <strong>${((winsByPosition[1] || 0) / config.games * 100).toFixed(1)}%</strong></p>
-            <p>🥉 Joueur 3: <strong>${((winsByPosition[2] || 0) / config.games * 100).toFixed(1)}%</strong></p>
+            <p><strong>${config.playersPerGame}</strong> joueurs autour du même sac, à tour de rôle (sans remise).</p>
+            <p>Premier à trouver la 🔵 = GAGNE! (${config.games?.toLocaleString() || 0} parties jouées)</p>
+            <p>🥇 Joueur 1: <strong>${((winsByPosition[0] || 0) / (config.games || 1) * 100).toFixed(1)}%</strong> |
+               🥈 Joueur 2: <strong>${((winsByPosition[1] || 0) / (config.games || 1) * 100).toFixed(1)}%</strong> |
+               🥉 Joueur 3: <strong>${((winsByPosition[2] || 0) / (config.games || 1) * 100).toFixed(1)}%</strong></p>
           `;
         },
+        getDistExplanation: (config, stats) => `
+          <strong>Ce graphique montre quelle position gagne le plus souvent.</strong>
+          Le joueur 1 a un avantage énorme car il pioche en premier!
+          Plus on est loin dans l'ordre, moins on a de chances.
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>Cumul des victoires par position.</strong>
+          On voit que les premières positions accumulent rapidement les victoires.
+          Les derniers joueurs n'ont presque jamais leur chance!
+        `,
+        getChildExplanation: (config, stats) => `
+          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+          <p>Imagine un jeu où ${config.playersPerGame} enfants piochent chacun leur tour dans le même sac.</p>
+          <p>Le premier qui trouve la bille bleue a gagné!</p>
+          <p><strong>C'est pas très juste:</strong> celui qui commence a beaucoup plus de chances! C'est pour ça qu'on tire au sort qui commence 🎲</p>
+        `,
         getMoral: (config, stats) => `
           <h2>💡 Ce que ça nous apprend</h2>
           <p class="quote">
-            🏆 Le premier joueur a un <strong>avantage structurel</strong>.<br><br>
-            Même si le jeu semble "équitable", l'ordre de passage compte énormément.<br>
-            C'est vrai dans les enchères, les entretiens d'embauche, et bien d'autres situations.<br><br>
-            <strong>L'ordre d'arrivée est souvent plus important que le talent.</strong>
+            🏆 L'ordre de passage donne un <strong>avantage structurel</strong>.<br>
+            <strong>Être premier compte souvent plus que le talent.</strong>
           </p>
         `
       },
       streak: {
         getStory: (config, stats, dist) => {
           const luckyCount = dist.get(1) || 0;
-          const bonusType = config.streakBonus > 0 ? 'augmente' : 'diminue';
+          const type = config.streakBonus > 0 ? 'augmente' : 'diminue';
           return `
             <h2>📖 L'Histoire - Streaks</h2>
-            <p>La probabilité de base est <span class="highlight">1/${config.totalBalls}</span>.</p>
-            <p>Mais après chaque échec, elle <strong>${bonusType} de ${Math.abs(config.streakBonus)}%</strong>!</p>
-            <p>${config.streakBonus > 0 ? '🔥 Main chaude: les échecs augmentent vos chances' : '❄️ Main froide: les échecs diminuent vos chances'}</p>
-            <br>
-            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> ont réussi du premier coup</p>
-            <p>😅 Le plus malchanceux: <strong>${stats.max.toLocaleString()}</strong> tentatives</p>
+            <p>Probabilité de base: 1/${config.totalBalls}. Après chaque échec, elle <strong>${type} de ${Math.abs(config.streakBonus)}%</strong>!</p>
+            <p>${config.streakBonus > 0 ? '🔥 Main chaude: plus tu perds, plus tu as de chances!' : '❄️ Main froide: plus tu perds, plus c\'est dur...'}</p>
+            <p>🍀 ${luckyCount.toLocaleString()} au 1er coup | 😅 Max: ${stats.max.toLocaleString()} tentatives</p>
           `;
         },
+        getDistExplanation: (config, stats) => `
+          <strong>${config.streakBonus > 0 ? 'Distribution compressée - moins de cas extrêmes.' : 'Distribution étalée - plus de cas extrêmes!'}</strong>
+          ${config.streakBonus > 0 ? 'La probabilité croissante rattrape les malchanceux.' : 'La probabilité décroissante piège les malchanceux.'}
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>${config.streakBonus > 0 ? 'Courbe plus pentue = convergence rapide.' : 'Courbe plus plate = convergence lente.'}</strong>
+          ${config.streakBonus > 0 ? 'Tout le monde finit par gagner assez vite.' : 'Certains peuvent rester bloqués très longtemps!'}
+        `,
+        getChildExplanation: (config, stats) => `
+          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+          <p>${config.streakBonus > 0
+            ? 'Imagine que plus tu rates, plus le sac devient "gentil" et t\'aide à trouver la bille bleue!'
+            : 'Imagine que plus tu rates, plus le sac devient "méchant" et cache encore mieux la bille bleue!'}</p>
+          <p><strong>Dans la vraie vie, chaque tirage est indépendant!</strong> Le sac n'a pas de mémoire 🧠</p>
+          <p>C'est ce qu'on appelle "l'erreur du joueur" - croire que la chance "doit tourner".</p>
+        `,
         getMoral: (config, stats) => `
           <h2>💡 Ce que ça nous apprend</h2>
           <p class="quote">
-            🎲 Le "Gambler's Fallacy" est l'idée que les probabilités changent après une série.<br><br>
-            ${config.streakBonus > 0
-              ? 'Ici la chance AUGMENTE vraiment après chaque échec - mais dans la vraie vie, <strong>chaque lancer est indépendant</strong>!'
-              : 'Ici la chance DIMINUE - comme certains systèmes injustes où "les pauvres restent pauvres".'}<br><br>
-            <strong>Ne confondez pas les patterns avec la causalité.</strong>
+            🎲 Dans la vraie vie, chaque tirage est <strong>indépendant</strong>.<br>
+            <strong>Le hasard n'a pas de mémoire!</strong>
           </p>
         `
       },
       economy: {
         getStory: (config, stats, dist) => {
           const avgCost = stats.average * config.cost;
-          const profitable = config.reward > avgCost;
-          const profitPercent = ((config.reward - avgCost) / avgCost * 100).toFixed(1);
+          const profit = config.reward - avgCost;
+          const profitable = profit > 0;
           return `
             <h2>📖 L'Histoire - Économie</h2>
-            <p>Chaque tentative coûte <span class="highlight">${config.cost}€</span>.</p>
-            <p>Trouver la boule bleue rapporte <span class="highlight">${config.reward}€</span>!</p>
-            <p>Probabilité: 1/${config.totalBalls} (espérance: ${config.totalBalls} essais)</p>
-            <br>
-            <p>💸 Coût moyen pour gagner: <strong>${avgCost.toFixed(0)}€</strong></p>
-            <p>💰 Gain net moyen: <strong style="color:${profitable ? '#4ade80' : '#f97316'}">${(config.reward - avgCost).toFixed(0)}€</strong></p>
-            <p>${profitable ? '📈' : '📉'} ROI: <strong>${profitPercent}%</strong></p>
+            <p>Chaque essai coûte <span class="highlight">${config.cost}€</span>. Gagner rapporte <span class="highlight">${config.reward}€</span>!</p>
+            <p>💸 Coût moyen: <strong>${avgCost.toFixed(0)}€</strong> |
+               💰 Gain net: <strong style="color:${profitable ? '#4ade80' : '#f97316'}">${profit.toFixed(0)}€</strong></p>
+            <p>${profitable ? '📈 Jeu RENTABLE sur le long terme!' : '📉 Jeu PERDANT sur le long terme!'}</p>
+          `;
+        },
+        getDistExplanation: (config, stats) => `
+          <strong>Chaque barre = un coût différent pour le joueur.</strong>
+          Les barres de gauche = joueurs chanceux (peu de dépenses).
+          Les barres de droite = joueurs qui ont dépensé beaucoup!
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>% de joueurs ayant "rentabilisé" selon leurs essais.</strong>
+          Plus on est à droite, plus on a dépensé.
+          La ligne pointillée serait le seuil de rentabilité.
+        `,
+        getChildExplanation: (config, stats) => {
+          const avgCost = stats.average * config.cost;
+          const profitable = config.reward > avgCost;
+          return `
+            <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+            <p>Imagine une machine où tu mets ${config.cost}€ à chaque essai. Si tu gagnes, tu reçois ${config.reward}€!</p>
+            <p>En moyenne, il faut ${stats.average.toFixed(0)} essais pour gagner, donc dépenser ${avgCost.toFixed(0)}€.</p>
+            <p><strong>${profitable
+              ? `Super! Tu gagnes ${(config.reward - avgCost).toFixed(0)}€ en moyenne! 🎉`
+              : `Attention! Tu perds ${(avgCost - config.reward).toFixed(0)}€ en moyenne! C'est comme ça que les casinos gagnent de l'argent 💸`
+            }</strong></p>
           `;
         },
         getMoral: (config, stats) => {
@@ -485,37 +597,42 @@
           return `
             <h2>💡 Ce que ça nous apprend</h2>
             <p class="quote">
-              ${profitable
-                ? '✅ Ce jeu est <strong>mathématiquement rentable</strong> sur le long terme!'
-                : '❌ Ce jeu est <strong>mathématiquement perdant</strong>. La maison gagne toujours.'}<br><br>
-              Espérance = Récompense - (Coût × Essais moyens)<br>
-              = ${config.reward}€ - (${config.cost}€ × ${stats.average.toFixed(0)}) = <strong>${(config.reward - avgCost).toFixed(0)}€</strong><br><br>
-              <strong>C'est pourquoi les casinos et loteries fixent leurs prix avec soin.</strong>
+              ${profitable ? '✅ Ce jeu est mathématiquement rentable.' : '❌ Ce jeu est mathématiquement perdant.'}<br>
+              <strong>L'espérance = ce que tu gagnes en moyenne sur le long terme.</strong>
             </p>
           `;
         }
       },
       multi: {
         getStory: (config, stats, dist) => {
-          const luckyCount = dist.get(config.targetBalls) || 0;
           return `
             <h2>📖 L'Histoire - Multi-cibles</h2>
-            <p>Cette fois, il faut trouver <span class="highlight">${config.targetBalls} boules bleues</span>!</p>
-            <p>Le sac contient ${config.totalBalls} boules (${config.blueBalls} bleues). Avec remise.</p>
-            <p>Probabilité par tirage: 1/${config.totalBalls}</p>
-            <br>
-            <p>🍀 Le plus chanceux: <strong>${stats.min}</strong> tentatives</p>
-            <p>😅 Le plus malchanceux: <strong>${stats.max.toLocaleString()}</strong> tentatives</p>
-            <p>📊 Moyenne: <strong>${stats.average.toFixed(0)}</strong> tentatives</p>
+            <p>Il faut trouver <span class="highlight">${config.targetBalls} boules bleues</span>! (avec remise)</p>
+            <p>Moyenne théorique: ~${(config.totalBalls * config.targetBalls).toLocaleString()} tentatives</p>
+            <p>🍀 Min: <strong>${stats.min}</strong> | 📊 Moyenne: <strong>${stats.average.toFixed(0)}</strong> | 😅 Max: <strong>${stats.max.toLocaleString()}</strong></p>
           `;
         },
+        getDistExplanation: (config, stats) => `
+          <strong>Distribution décalée vers la droite.</strong>
+          Plus on cherche de boules, plus le "pic" se déplace.
+          C'est la somme de ${config.targetBalls} distributions géométriques!
+        `,
+        getCumulExplanation: (config, stats, p50, p90) => `
+          <strong>Courbe plus "S" que pour une seule boule.</strong>
+          Le début est plus plat (impossible de finir très vite).
+          50% réussissent en ~${p50} tentatives.
+        `,
+        getChildExplanation: (config, stats) => `
+          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
+          <p>Au lieu de chercher 1 bille bleue, tu dois en trouver ${config.targetBalls}!</p>
+          <p>C'est ${config.targetBalls}x plus long en moyenne. Mais parfois BEAUCOUP plus pour les malchanceux (${stats.max.toLocaleString()} essais!).</p>
+          <p><strong>Plus l'objectif est grand, plus les écarts entre chanceux et malchanceux sont énormes!</strong></p>
+        `,
         getMoral: (config, stats) => `
           <h2>💡 Ce que ça nous apprend</h2>
           <p class="quote">
-            📈 Trouver ${config.targetBalls} boules prend ~${config.targetBalls}x plus de temps qu'une seule!<br><br>
-            C'est la <strong>linéarité de l'espérance</strong>: E[X₁+X₂+...] = E[X₁] + E[X₂] + ...<br>
-            Mais la variance augmente aussi - les écarts deviennent plus extrêmes.<br><br>
-            <strong>Les objectifs ambitieux demandent une persévérance proportionnelle.</strong>
+            📈 Objectifs multiples = temps × N mais variance × N²<br>
+            <strong>Les grands objectifs amplifient les inégalités.</strong>
           </p>
         `
       }
@@ -579,14 +696,12 @@
         let remaining = config.totalBalls;
         let blueLeft = config.blueBalls;
         let turn = 0;
-        let totalAttempts = 0;
 
         while (blueLeft > 0 && remaining > 0) {
-          totalAttempts++;
           const playerIndex = turn % config.playersPerGame;
           if (Math.floor(Math.random() * remaining) < blueLeft) {
             winsByPosition[playerIndex]++;
-            results.push(playerIndex + 1); // Winner position
+            results.push(playerIndex + 1);
             break;
           }
           remaining--;
@@ -608,7 +723,7 @@
         while (true) {
           attempts++;
           const modifier = 1 + (streak * config.streakBonus / 100);
-          const prob = Math.min(1, Math.max(0, baseProb * modifier));
+          const prob = Math.min(1, Math.max(0.001, baseProb * modifier));
           if (Math.random() < prob) break;
           streak++;
         }
@@ -618,7 +733,6 @@
     }
 
     function simulateEconomy(config) {
-      // Same as replacement, but we track cost
       return simulateReplacement(config);
     }
 
@@ -669,7 +783,6 @@
         btn.classList.toggle('active', btn.dataset.mode === mode);
       });
 
-      // Show/hide mode-specific configs
       document.querySelectorAll('[id$="-config"]').forEach(el => el.style.display = 'none');
       (modeConfigs[mode]?.showConfigs || []).forEach(id => {
         document.getElementById(id).style.display = 'block';
@@ -695,8 +808,8 @@
     }
 
     function updateCharts(distribution, stats) {
-      const labels = [...distribution.keys()].slice(0, 100);
-      const values = [...distribution.values()].slice(0, 100);
+      const labels = [...distribution.keys()].slice(0, 80);
+      const values = [...distribution.values()].slice(0, 80);
 
       let cumulative = 0;
       const cumulativeData = values.map(v => {
@@ -706,9 +819,10 @@
 
       const chartOptions = {
         responsive: true,
+        maintainAspectRatio: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+          x: { ticks: { color: '#888', maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.1)' } },
           y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } }
         }
       };
@@ -738,7 +852,8 @@
             borderColor: 'rgba(74, 222, 128, 1)',
             backgroundColor: 'rgba(74, 222, 128, 0.1)',
             fill: true,
-            tension: 0.3
+            tension: 0.3,
+            pointRadius: 0
           }]
         },
         options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 0, max: 100 } } }
@@ -746,26 +861,26 @@
     }
 
     function updateStats(stats, distribution, config) {
-      // Percentiles
       let cumulative = 0;
-      let p50 = 0, p90 = 0, p99 = 0;
+      let p50 = 0, p90 = 0;
       for (const [attempts, count] of distribution) {
         cumulative += count;
         if (!p50 && cumulative >= stats.count * 0.5) p50 = attempts;
         if (!p90 && cumulative >= stats.count * 0.9) p90 = attempts;
-        if (!p99 && cumulative >= stats.count * 0.99) p99 = attempts;
       }
 
       const luckyCount = distribution.get(1) || distribution.get(stats.min) || 0;
 
       document.getElementById('statsGrid').innerHTML = `
         <div class="stat-card lucky"><div class="value">🍀 ${luckyCount.toLocaleString()}</div><div class="label">Chanceux</div></div>
-        <div class="stat-card unlucky"><div class="value">😅 ${stats.max.toLocaleString()}</div><div class="label">Max tentatives</div></div>
-        <div class="stat-card"><div class="value">${stats.average.toFixed(1)}</div><div class="label">Moyenne</div></div>
+        <div class="stat-card unlucky"><div class="value">😅 ${stats.max.toLocaleString()}</div><div class="label">Max</div></div>
+        <div class="stat-card"><div class="value">${stats.average.toFixed(0)}</div><div class="label">Moyenne</div></div>
         <div class="stat-card"><div class="value">${stats.median}</div><div class="label">Médiane</div></div>
         <div class="stat-card"><div class="value">${p50}</div><div class="label">50% en ≤</div></div>
         <div class="stat-card"><div class="value">${p90}</div><div class="label">90% en ≤</div></div>
       `;
+
+      return { p50, p90 };
     }
 
     async function runSimulation() {
@@ -773,16 +888,15 @@
       const progressBar = document.getElementById('progressBar');
 
       btn.disabled = true;
-      btn.textContent = '⏳ Simulation en cours...';
+      btn.textContent = '⏳ Simulation...';
       progressBar.classList.add('visible');
       progressBar.querySelector('.fill').style.width = '30%';
 
-      await new Promise(r => setTimeout(r, 50)); // Let UI update
+      await new Promise(r => setTimeout(r, 50));
 
       const config = getConfig();
       let results;
 
-      // Run simulation
       switch (currentMode) {
         case 'replacement': results = simulateReplacement(config); break;
         case 'no-replacement': results = simulateNoReplacement(config); break;
@@ -798,14 +912,17 @@
 
       const stats = calculateStats(results);
       const distribution = buildDistribution(results);
+      const { p50, p90 } = updateStats(stats, distribution, config);
 
       progressBar.querySelector('.fill').style.width = '100%';
 
-      // Update UI
       const content = modeContent[currentMode];
       document.getElementById('storyBox').innerHTML = content.getStory(config, stats, distribution);
+      document.getElementById('distExplanation').innerHTML = content.getDistExplanation(config, stats);
+      document.getElementById('cumulExplanation').innerHTML = content.getCumulExplanation(config, stats, p50, p90);
+      document.getElementById('childBox').innerHTML = content.getChildExplanation(config, stats);
       document.getElementById('moralBox').innerHTML = content.getMoral(config, stats);
-      updateStats(stats, distribution, config);
+
       updateCharts(distribution, stats);
 
       document.getElementById('placeholder').style.display = 'none';
@@ -823,7 +940,6 @@
 
     document.getElementById('runBtn').addEventListener('click', runSimulation);
 
-    // Initialize
     selectMode('replacement');
   </script>
 </body>
