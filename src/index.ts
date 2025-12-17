@@ -3,6 +3,7 @@ import { cpus } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import type { Config, Statistics, WorkerData } from './types.js';
+import { generateHtmlReport } from './html-output.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,22 +14,29 @@ const config: Config = {
   redBalls: 499,
   blueBalls: 1,
   withReplacement: true,
+  output: 'console',
 };
 
 // Parse CLI arguments
 process.argv.slice(2).forEach((arg) => {
   const matchNum = arg.match(/^--(\w+)=(\d+)$/);
   const matchBool = arg.match(/^--(\w+)=(true|false)$/);
+  const matchStr = arg.match(/^--(\w+)=(\w+)$/);
 
   if (matchNum) {
     const [, key, value] = matchNum;
-    if (key in config && key !== 'withReplacement') {
+    if (key in config && key !== 'withReplacement' && key !== 'output') {
       (config as unknown as Record<string, number>)[key] = Number(value);
     }
   } else if (matchBool) {
     const [, key, value] = matchBool;
     if (key === 'withReplacement') {
       config.withReplacement = value === 'true';
+    }
+  } else if (matchStr) {
+    const [, key, value] = matchStr;
+    if (key === 'output' && (value === 'console' || value === 'html')) {
+      config.output = value;
     }
   }
 });
@@ -237,7 +245,13 @@ async function main(): Promise<void> {
   const stats = calculateStatistics(results);
   const distribution = buildDistribution(results);
 
-  formatOutput(stats, distribution);
+  if (config.output === 'html') {
+    const filename = generateHtmlReport(config, stats, distribution, TOTAL_BALLS);
+    console.log(`\n✅ Rapport HTML généré: ${filename}`);
+    console.log(`   Ouvre le fichier dans ton navigateur pour voir les graphiques!`);
+  } else {
+    formatOutput(stats, distribution);
+  }
 }
 
 main().catch(console.error);

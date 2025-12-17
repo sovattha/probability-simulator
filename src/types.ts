@@ -3,6 +3,7 @@ export interface Config {
   redBalls: number;
   blueBalls: number;
   withReplacement: boolean;
+  output: 'console' | 'html';
 }
 
 export interface WorkerData {
