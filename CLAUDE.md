@@ -4,33 +4,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Node.js probability simulation that models players picking balls from a bag until they get a blue ball. It uses parallel computing to run millions of simulations concurrently and outputs statistics and distribution of attempts needed.
+Simulation de probabilites qui illustre la variance dans les jeux de hasard. Des millions de joueurs piochent des boules dans un sac jusqu'a obtenir la boule bleue (probabilite 1/500).
+
+**Ce que la simulation demontre:**
+- Parmi 1 million de joueurs, certains chanceux trouvent la boule bleue du premier coup
+- D'autres malchanceux doivent s'y reprendre des milliers de fois (10x+ la moyenne theorique)
+- La mediane est souvent bien inferieure a la moyenne (distribution geometrique)
+- Les percentiles (50%, 90%, 99%) montrent l'inegalite des resultats
+
+## Tech Stack
+
+- **TypeScript** + ES Modules
+- **Node.js Worker Threads** (parallelisme natif, zero dependance externe)
+- Build: `tsc` vers `dist/`
 
 ## Commands
 
 ```bash
-# Install dependencies
-npm install
+npm install          # Install dev dependencies
+npm run build        # Compile TypeScript
+npm start            # Run simulation (1M players default)
+npm run dev          # Build + run
 
-# Run the simulation (default: 1M players, 500 balls)
-node index.js
-
-# Run with custom configuration
-node index.js --players=100000 --redBalls=99 --blueBalls=1
+# Custom configuration
+npm start -- --players=100000 --redBalls=99 --blueBalls=1
 ```
 
 ## CLI Arguments
 
-- `--players=N` - Number of simulations to run (default: 1,000,000)
-- `--redBalls=N` - Number of red balls in bag (default: 499)
-- `--blueBalls=N` - Number of blue balls in bag (default: 1)
+- `--players=N` - Nombre de simulations (default: 1,000,000)
+- `--redBalls=N` - Boules rouges dans le sac (default: 499)
+- `--blueBalls=N` - Boules bleues dans le sac (default: 1)
 
 ## Architecture
 
-Single-file simulation (`index.js`) using **paralleljs** to distribute work across CPU cores.
+```
+src/
+  index.ts   # Main: CLI parsing, worker orchestration, statistics, output
+  worker.ts  # Worker thread: runs N simulations in parallel
+  types.ts   # TypeScript interfaces
+```
 
 Key functions:
-- `buildSimulationFunction()` - Creates the worker function with embedded config (required because paralleljs serializes functions)
-- `calculateStatistics()` - Computes average, median, min/max from results
+- `runWorker()` - Spawns a worker thread with config
+- `calculateStatistics()` - Computes average, median, min/max
 - `buildDistribution()` - Aggregates results into attempt counts
-- `formatOutput()` - Displays formatted results with histogram
+- `formatOutput()` - Displays results with storytelling (chanceux/malchanceux)

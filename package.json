@@ -1,15 +1,20 @@
 {
   "name": "little-stats",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Probability simulation using parallel computing",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
+  "keywords": ["simulation", "probability", "statistics"],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "paralleljs": "^1.1.0"
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
   }
 }
