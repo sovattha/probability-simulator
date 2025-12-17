@@ -4,21 +4,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Simulation de probabilites qui illustre la variance dans les jeux de hasard. Des millions de joueurs piochent des boules dans un sac jusqu'a obtenir la boule bleue (probabilite 1/500).
+Interactive probability simulator that demonstrates statistics through storytelling. Available as:
+- **Web app** (`app.html`) - No installation, runs in browser, bilingual FR/EN
+- **CLI** (Node.js) - For large-scale simulations with multi-threading
 
-**Ce que la simulation demontre:**
-- Parmi 1 million de joueurs, certains chanceux trouvent la boule bleue du premier coup
-- D'autres malchanceux doivent s'y reprendre des milliers de fois (10x+ la moyenne theorique)
-- La mediane est souvent bien inferieure a la moyenne (distribution geometrique)
-- Les percentiles (50%, 90%, 99%) montrent l'inegalite des resultats
+**What the simulation demonstrates:**
+- Geometric vs uniform distributions
+- Variance and expected value in games of chance
+- How pity systems, streaks, and competition mechanics work
+- The gambler's fallacy and probability independence
+
+## Quick Start
+
+**Web app (recommended):**
+```bash
+open app.html  # Just open in browser, that's it!
+```
+
+**CLI version:**
+```bash
+npm install && npm run build && npm start
+```
 
 ## Tech Stack
 
-- **TypeScript** + ES Modules
-- **Node.js Worker Threads** (parallelisme natif, zero dependance externe)
-- Build: `tsc` vers `dist/`
+- **Web app**: Pure HTML/CSS/JavaScript + Chart.js
+- **CLI**: TypeScript + ES Modules + Node.js Worker Threads
+- Build: `tsc` to `dist/`
 
-## Commands
+## Files
+
+```
+app.html           # Interactive web app (7 modes, bilingual)
+src/
+  index.ts         # CLI: argument parsing, worker orchestration, output
+  worker.ts        # Worker thread: simulation logic
+  html-output.ts   # HTML report generator
+  types.ts         # TypeScript interfaces
+```
+
+## CLI Commands
 
 ```bash
 npm install          # Install dev dependencies
@@ -27,26 +52,25 @@ npm start            # Run simulation (1M players default)
 npm run dev          # Build + run
 
 # Custom configuration
-npm start -- --players=100000 --redBalls=99 --blueBalls=1
+npm start -- --players=100000 --redBalls=99 --blueBalls=1 --withReplacement=false --output=html
 ```
 
 ## CLI Arguments
 
-- `--players=N` - Nombre de simulations (default: 1,000,000)
-- `--redBalls=N` - Boules rouges dans le sac (default: 499)
-- `--blueBalls=N` - Boules bleues dans le sac (default: 1)
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--players` | 1,000,000 | Number of simulations |
+| `--redBalls` | 499 | Red balls in bag |
+| `--blueBalls` | 1 | Blue balls in bag |
+| `--withReplacement` | true | Put ball back after draw |
+| `--output` | console | `console` or `html` |
 
-## Architecture
+## Web App Modes
 
-```
-src/
-  index.ts   # Main: CLI parsing, worker orchestration, statistics, output
-  worker.ts  # Worker thread: runs N simulations in parallel
-  types.ts   # TypeScript interfaces
-```
-
-Key functions:
-- `runWorker()` - Spawns a worker thread with config
-- `calculateStatistics()` - Computes average, median, min/max
-- `buildDistribution()` - Aggregates results into attempt counts
-- `formatOutput()` - Displays results with storytelling (chanceux/malchanceux)
+1. **With replacement** - Geometric distribution
+2. **Without replacement** - Uniform distribution, guaranteed max
+3. **Pity System** - Gacha mechanics simulation
+4. **Competition** - Turn order advantage
+5. **Streaks** - Hot/cold hand (gambler's fallacy)
+6. **Economy** - Cost vs reward, expected value
+7. **Multi-target** - Find N balls, variance scaling
