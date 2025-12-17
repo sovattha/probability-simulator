@@ -2,6 +2,7 @@ export interface Config {
   players: number;
   redBalls: number;
   blueBalls: number;
+  withReplacement: boolean;
 }
 
 export interface WorkerData {
@@ -9,6 +10,8 @@ export interface WorkerData {
   count: number;
   totalBalls: number;
   blueBalls: number;
+  redBalls: number;
+  withReplacement: boolean;
 }
 
 export interface Statistics {

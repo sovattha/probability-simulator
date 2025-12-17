@@ -12,15 +12,23 @@ const config: Config = {
   players: 1_000_000,
   redBalls: 499,
   blueBalls: 1,
+  withReplacement: true,
 };
 
 // Parse CLI arguments
 process.argv.slice(2).forEach((arg) => {
-  const match = arg.match(/^--(\w+)=(\d+)$/);
-  if (match) {
-    const [, key, value] = match;
-    if (key in config) {
-      config[key as keyof Config] = Number(value);
+  const matchNum = arg.match(/^--(\w+)=(\d+)$/);
+  const matchBool = arg.match(/^--(\w+)=(true|false)$/);
+
+  if (matchNum) {
+    const [, key, value] = matchNum;
+    if (key in config && key !== 'withReplacement') {
+      (config as unknown as Record<string, number>)[key] = Number(value);
+    }
+  } else if (matchBool) {
+    const [, key, value] = matchBool;
+    if (key === 'withReplacement') {
+      config.withReplacement = value === 'true';
     }
   }
 });
@@ -46,6 +54,16 @@ function calculateStatistics(results: number[]): Statistics {
   const sum = results.reduce((acc, val) => acc + val, 0);
   const count = results.length;
 
+  // Theoretical average depends on mode
+  let theoretical: number;
+  if (config.withReplacement) {
+    // Geometric distribution: E[X] = 1/p = totalBalls/blueBalls
+    theoretical = TOTAL_BALLS / config.blueBalls;
+  } else {
+    // Without replacement: E[X] = (totalBalls + 1) / (blueBalls + 1)
+    theoretical = (TOTAL_BALLS + 1) / (config.blueBalls + 1);
+  }
+
   return {
     count,
     min: sorted[0],
@@ -55,7 +73,7 @@ function calculateStatistics(results: number[]): Statistics {
       count % 2 === 0
         ? (sorted[count / 2 - 1] + sorted[count / 2]) / 2
         : sorted[Math.floor(count / 2)],
-    theoretical: TOTAL_BALLS / config.blueBalls,
+    theoretical,
   };
 }
 
@@ -68,10 +86,12 @@ function buildDistribution(results: number[]): Map<number, number> {
 }
 
 function formatOutput(stats: Statistics, distribution: Map<number, number>): void {
+  const modeLabel = config.withReplacement ? 'avec remise' : 'sans remise';
+
   console.log('\n=== SIMULATION RESULTS ===\n');
   console.log(`Players:      ${stats.count.toLocaleString()}`);
   console.log(`Bag size:     ${TOTAL_BALLS} (${config.redBalls} red, ${config.blueBalls} blue)`);
-  console.log(`Probability:  1/${TOTAL_BALLS}`);
+  console.log(`Mode:         ${modeLabel}`);
   console.log(`Workers:      ${NUM_WORKERS}`);
 
   // The story - setup and results
@@ -80,11 +100,23 @@ function formatOutput(stats: Statistics, distribution: Map<number, number>): voi
     `Imagine un sac contenant ${TOTAL_BALLS} boules: ${config.redBalls} 🔴 rouges et ` +
     `${config.blueBalls} 🔵 bleue(s). ${stats.count.toLocaleString()} joueurs vont tenter leur chance.`
   );
-  console.log(
-    `Chacun pioche une boule au hasard, la remet dans le sac, et recommence ` +
-    `jusqu'à tomber sur la boule bleue.`
-  );
-  console.log(`La probabilité de succès à chaque tirage est de 1/${TOTAL_BALLS}.\n`);
+
+  if (config.withReplacement) {
+    console.log(
+      `Chacun pioche une boule au hasard, la remet dans le sac, et recommence ` +
+      `jusqu'à tomber sur la boule bleue.`
+    );
+    console.log(`La probabilité de succès à chaque tirage est de 1/${TOTAL_BALLS}.\n`);
+  } else {
+    console.log(
+      `Chacun pioche une boule au hasard et la garde. Il recommence ` +
+      `jusqu'à tomber sur la boule bleue.`
+    );
+    console.log(
+      `La probabilité augmente à chaque tirage! Au pire, il reste ${config.blueBalls} boule(s) ` +
+      `après ${config.redBalls} tirages.\n`
+    );
+  }
 
   const luckyCount = distribution.get(1) ?? 0;
   const luckyRatio = stats.count / luckyCount;
@@ -114,20 +146,35 @@ function formatOutput(stats: Statistics, distribution: Map<number, number>): voi
 
   // The moral
   console.log('\n--- 💡 Ce que ça nous apprend ---');
-  console.log(
-    `✅ Même avec une probabilité de 1/${TOTAL_BALLS}, 100% des joueurs finissent par réussir.`
-  );
-  console.log(
-    `💪 La persévérance bat toujours les statistiques: le malchanceux à ${stats.max.toLocaleString()} ` +
-    `tentatives a quand même gagné, comme tous les autres.`
-  );
-  console.log(
-    `⚖️  La différence entre le chanceux (1 tentative) et le malchanceux (${stats.max.toLocaleString()}) ` +
-    `est de ${stats.max - 1}x, mais le résultat final est le même: la victoire.`
-  );
-  console.log(
-    `\n🎯 La chance détermine le "quand", pas le "si". Celui qui persévère gagne toujours.`
-  );
+  if (config.withReplacement) {
+    console.log(
+      `✅ Même avec une probabilité de 1/${TOTAL_BALLS}, 100% des joueurs finissent par réussir.`
+    );
+    console.log(
+      `💪 La persévérance bat toujours les statistiques: le malchanceux à ${stats.max.toLocaleString()} ` +
+      `tentatives a quand même gagné, comme tous les autres.`
+    );
+    console.log(
+      `⚖️  La différence entre le chanceux (1 tentative) et le malchanceux (${stats.max.toLocaleString()}) ` +
+      `est de ${stats.max - 1}x, mais le résultat final est le même: la victoire.`
+    );
+    console.log(
+      `\n🎯 La chance détermine le "quand", pas le "si". Celui qui persévère gagne toujours.`
+    );
+  } else {
+    console.log(
+      `✅ Sans remise, la victoire est GARANTIE en ${TOTAL_BALLS} tentatives maximum.`
+    );
+    console.log(
+      `📈 La probabilité augmente à chaque échec: de 1/${TOTAL_BALLS} au début à 100% à la fin.`
+    );
+    console.log(
+      `⚖️  Écart chanceux/malchanceux: ${stats.max - 1}x (mais max ${TOTAL_BALLS} tentatives).`
+    );
+    console.log(
+      `\n🎯 Sans remise, même le plus malchanceux a une limite. Le système est plus "juste".`
+    );
+  }
 
   console.log('\n--- Statistics ---');
   console.log(`Theoretical:  ${stats.theoretical.toFixed(2)} attempts`);
@@ -154,8 +201,9 @@ function formatOutput(stats: Statistics, distribution: Map<number, number>): voi
 }
 
 async function main(): Promise<void> {
+  const modeLabel = config.withReplacement ? 'avec remise' : 'sans remise';
   console.log('Starting simulation...');
-  console.log(`Config: ${config.players.toLocaleString()} players, ${TOTAL_BALLS} balls in bag`);
+  console.log(`Config: ${config.players.toLocaleString()} players, ${TOTAL_BALLS} balls (${modeLabel})`);
   console.log(`Using ${NUM_WORKERS} worker threads`);
 
   const startTime = performance.now();
@@ -174,6 +222,8 @@ async function main(): Promise<void> {
         count,
         totalBalls: TOTAL_BALLS,
         blueBalls: config.blueBalls,
+        redBalls: config.redBalls,
+        withReplacement: config.withReplacement,
       })
     );
   }
