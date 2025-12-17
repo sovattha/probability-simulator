@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎲 Simulateur de Probabilités</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(0,0,0,0.3);
+    }
+    .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .header p { color: #888; }
+
+    .main-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(0,0,0,0.4);
+      padding: 1.5rem;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      overflow-y: auto;
+    }
+    .sidebar h3 { color: #e94560; margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+
+    .mode-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .mode-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #eee;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .mode-btn:hover { background: rgba(255,255,255,0.1); }
+    .mode-btn.active {
+      background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
+      border-color: #e94560;
+    }
+    .mode-btn .mode-icon { font-size: 1.2rem; margin-right: 0.5rem; }
+    .mode-btn .mode-name { font-weight: 600; }
+    .mode-btn .mode-desc { font-size: 0.75rem; color: #aaa; display: block; margin-top: 0.25rem; }
+    .mode-btn.active .mode-desc { color: #ddd; }
+
+    .config-section { margin-bottom: 1.5rem; }
+    .config-section label {
+      display: block;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 0.25rem;
+    }
+    .config-section input, .config-section select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #eee;
+      font-size: 1rem;
+    }
+    .config-section input:focus, .config-section select:focus {
+      outline: none;
+      border-color: #e94560;
+    }
+
+    .config-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .run-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #e94560 0%, #c73659 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .run-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(233,69,96,0.4); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Content */
+    .content {
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #666;
+      text-align: center;
+    }
+    .placeholder .icon { font-size: 4rem; margin-bottom: 1rem; }
+
+    .results { display: none; }
+    .results.visible { display: block; }
+
+    .story-box {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid #0f3460;
+    }
+    .story-box h2 { color: #e94560; margin-bottom: 1rem; }
+    .story-box p { line-height: 1.8; margin-bottom: 0.5rem; }
+    .story-box .highlight { color: #e94560; font-weight: bold; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-card .value { font-size: 1.75rem; font-weight: bold; color: #e94560; }
+    .stat-card .label { color: #888; font-size: 0.8rem; margin-top: 0.25rem; }
+    .stat-card.lucky .value { color: #4ade80; }
+    .stat-card.unlucky .value { color: #f97316; }
+
+    .chart-container {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .chart-container h3 { margin-bottom: 1rem; color: #e94560; }
+
+    .moral-box {
+      background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .moral-box h2 { margin-bottom: 1rem; }
+    .moral-box .quote { font-size: 1.25rem; font-style: italic; opacity: 0.95; line-height: 1.6; }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 1rem;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar.visible { display: block; }
+    .progress-bar .fill {
+      height: 100%;
+      background: #e94560;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    @media (max-width: 900px) {
+      .main-container { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎲 Simulateur de Probabilités</h1>
+    <p>Explore différents scénarios et découvre ce que les statistiques nous apprennent</p>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <h3>🎮 Mode de jeu</h3>
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="replacement">
+          <span class="mode-icon">🔄</span>
+          <span class="mode-name">Avec remise</span>
+          <span class="mode-desc">La boule retourne dans le sac</span>
+        </button>
+        <button class="mode-btn" data-mode="no-replacement">
+          <span class="mode-icon">🎯</span>
+          <span class="mode-name">Sans remise</span>
+          <span class="mode-desc">La boule est gardée</span>
+        </button>
+        <button class="mode-btn" data-mode="pity">
+          <span class="mode-icon">🎰</span>
+          <span class="mode-name">Pity System</span>
+          <span class="mode-desc">Garantie après X échecs</span>
+        </button>
+        <button class="mode-btn" data-mode="competition">
+          <span class="mode-icon">🏆</span>
+          <span class="mode-name">Compétition</span>
+          <span class="mode-desc">Course au premier</span>
+        </button>
+        <button class="mode-btn" data-mode="streak">
+          <span class="mode-icon">🔥</span>
+          <span class="mode-name">Streaks</span>
+          <span class="mode-desc">Main chaude / froide</span>
+        </button>
+        <button class="mode-btn" data-mode="economy">
+          <span class="mode-icon">💰</span>
+          <span class="mode-name">Économie</span>
+          <span class="mode-desc">Coût vs Récompense</span>
+        </button>
+        <button class="mode-btn" data-mode="multi">
+          <span class="mode-icon">🎯</span>
+          <span class="mode-name">Multi-cibles</span>
+          <span class="mode-desc">Trouver N boules bleues</span>
+        </button>
+      </div>
+
+      <h3>⚙️ Configuration</h3>
+
+      <div class="config-section">
+        <label>Nombre de joueurs</label>
+        <input type="number" id="players" value="100000" min="1000" max="1000000" step="1000">
+      </div>
+
+      <div class="config-group">
+        <div class="config-section">
+          <label>Boules rouges</label>
+          <input type="number" id="redBalls" value="499" min="1" max="9999">
+        </div>
+        <div class="config-section">
+          <label>Boules bleues</label>
+          <input type="number" id="blueBalls" value="1" min="1" max="100">
+        </div>
+      </div>
+
+      <!-- Mode-specific configs -->
+      <div id="pity-config" class="config-section" style="display:none;">
+        <label>Pity démarre après</label>
+        <input type="number" id="pityStart" value="50" min="1">
+        <label style="margin-top:0.5rem;">Garantie à</label>
+        <input type="number" id="pityGuarantee" value="90" min="1">
+      </div>
+
+      <div id="competition-config" class="config-section" style="display:none;">
+        <label>Joueurs par partie</label>
+        <input type="number" id="playersPerGame" value="10" min="2" max="100">
+      </div>
+
+      <div id="streak-config" class="config-section" style="display:none;">
+        <label>Bonus/Malus par streak (%)</label>
+        <input type="number" id="streakBonus" value="10" min="-50" max="50">
+      </div>
+
+      <div id="economy-config" class="config-section" style="display:none;">
+        <div class="config-group">
+          <div>
+            <label>Coût par essai</label>
+            <input type="number" id="cost" value="1" min="1">
+          </div>
+          <div>
+            <label>Récompense</label>
+            <input type="number" id="reward" value="400" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div id="multi-config" class="config-section" style="display:none;">
+        <label>Boules bleues à trouver</label>
+        <input type="number" id="targetBalls" value="3" min="1" max="10">
+      </div>
+
+      <button class="run-btn" id="runBtn">▶️ Lancer la simulation</button>
+      <div class="progress-bar" id="progressBar"><div class="fill"></div></div>
+    </div>
+
+    <div class="content">
+      <div class="placeholder" id="placeholder">
+        <div class="icon">🎲</div>
+        <h2>Choisis un mode et lance la simulation</h2>
+        <p style="margin-top:0.5rem;">Les résultats apparaîtront ici</p>
+      </div>
+
+      <div class="results" id="results">
+        <div class="story-box" id="storyBox"></div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="chart-container">
+          <h3>📊 Distribution des tentatives</h3>
+          <canvas id="distributionChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>📈 Distribution cumulative</h3>
+          <canvas id="cumulativeChart"></canvas>
+        </div>
+        <div class="moral-box" id="moralBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let currentMode = 'replacement';
+    let distributionChart = null;
+    let cumulativeChart = null;
+
+    // Mode configurations
+    const modeConfigs = {
+      replacement: { showConfigs: [] },
+      'no-replacement': { showConfigs: [] },
+      pity: { showConfigs: ['pity-config'] },
+      competition: { showConfigs: ['competition-config'] },
+      streak: { showConfigs: ['streak-config'] },
+      economy: { showConfigs: ['economy-config'] },
+      multi: { showConfigs: ['multi-config'] }
+    };
+
+    // Mode stories and morals
+    const modeContent = {
+      replacement: {
+        getStory: (config, stats, dist) => {
+          const luckyCount = dist.get(1) || 0;
+          return `
+            <h2>📖 L'Histoire</h2>
+            <p>Imagine un sac contenant <span class="highlight">${config.totalBalls} boules</span>:
+               ${config.redBalls} 🔴 rouges et ${config.blueBalls} 🔵 bleue(s).</p>
+            <p><span class="highlight">${config.players.toLocaleString()}</span> joueurs vont tenter leur chance.</p>
+            <p>Chacun pioche une boule au hasard, <strong>la remet dans le sac</strong>, et recommence jusqu'à tomber sur la boule bleue.</p>
+            <p>La probabilité de succès à chaque tirage est de <span class="highlight">1/${config.totalBalls}</span>.</p>
+            <br>
+            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux ont trouvé du premier coup!</p>
+            <p>😅 Le plus malchanceux a dû s'y reprendre <strong>${stats.max.toLocaleString()}</strong> fois...</p>
+          `;
+        },
+        getMoral: (config, stats) => `
+          <h2>💡 Ce que ça nous apprend</h2>
+          <p class="quote">
+            ✅ Même avec une probabilité de 1/${config.totalBalls}, 100% des joueurs finissent par réussir.<br><br>
+            🎯 La chance détermine le "quand", pas le "si".<br>
+            <strong>Celui qui persévère gagne toujours.</strong>
+          </p>
+        `
+      },
+      'no-replacement': {
+        getStory: (config, stats, dist) => {
+          const luckyCount = dist.get(1) || 0;
+          return `
+            <h2>📖 L'Histoire</h2>
+            <p>Imagine un sac contenant <span class="highlight">${config.totalBalls} boules</span>:
+               ${config.redBalls} 🔴 rouges et ${config.blueBalls} 🔵 bleue(s).</p>
+            <p><span class="highlight">${config.players.toLocaleString()}</span> joueurs vont tenter leur chance.</p>
+            <p>Chacun pioche une boule au hasard et <strong>la garde</strong>. La probabilité augmente à chaque tirage!</p>
+            <p>Au pire, il reste ${config.blueBalls} boule(s) après ${config.redBalls} tirages.</p>
+            <br>
+            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux ont trouvé du premier coup!</p>
+            <p>😅 Le plus malchanceux a eu besoin de <strong>${stats.max.toLocaleString()}</strong> tentatives (max: ${config.totalBalls})</p>
+          `;
+        },
+        getMoral: (config, stats) => `
+          <h2>💡 Ce que ça nous apprend</h2>
+          <p class="quote">
+            ✅ Sans remise, la victoire est GARANTIE en ${config.totalBalls} tentatives maximum.<br><br>
+            📈 La probabilité augmente à chaque échec.<br>
+            <strong>Le système est plus "juste" - même le malchanceux a une limite.</strong>
+          </p>
+        `
+      },
+      pity: {
+        getStory: (config, stats, dist) => {
+          const luckyCount = dist.get(1) || 0;
+          return `
+            <h2>📖 L'Histoire - Pity System (Gacha)</h2>
+            <p>Comme dans les jeux mobiles! La probabilité de base est <span class="highlight">1/${config.totalBalls}</span>.</p>
+            <p>Mais après <strong>${config.pityStart}</strong> échecs, elle augmente progressivement...</p>
+            <p>Et à <strong>${config.pityGuarantee}</strong> tentatives, c'est <span class="highlight">GARANTI</span>! 🎰</p>
+            <br>
+            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> ont eu de la chance naturelle (1er coup)</p>
+            <p>😅 Le moins chanceux a atteint <strong>${stats.max.toLocaleString()}</strong> tentatives</p>
+            <p>📊 Mais personne ne dépasse ${config.pityGuarantee}!</p>
+          `;
+        },
+        getMoral: (config, stats) => `
+          <h2>💡 Ce que ça nous apprend</h2>
+          <p class="quote">
+            🎰 Le Pity System donne une <strong>illusion de contrôle</strong>.<br><br>
+            Les joueurs pensent "je suis proche de la garantie!" et continuent à payer.<br>
+            C'est un mécanisme psychologique puissant utilisé par les jeux gacha.<br><br>
+            <strong>La maison gagne toujours, mais le joueur se sent "protégé".</strong>
+          </p>
+        `
+      },
+      competition: {
+        getStory: (config, stats, dist) => {
+          const winsByPosition = config.winsByPosition || [];
+          return `
+            <h2>📖 L'Histoire - Compétition</h2>
+            <p><strong>${config.playersPerGame}</strong> joueurs s'affrontent autour du même sac.</p>
+            <p>Ils piochent à tour de rôle (sans remise). Le premier à trouver la 🔵 gagne!</p>
+            <p>${config.games.toLocaleString()} parties ont été jouées.</p>
+            <br>
+            <p>🥇 Joueur 1 a gagné <strong>${((winsByPosition[0] || 0) / config.games * 100).toFixed(1)}%</strong> des parties</p>
+            <p>🥈 Joueur 2: <strong>${((winsByPosition[1] || 0) / config.games * 100).toFixed(1)}%</strong></p>
+            <p>🥉 Joueur 3: <strong>${((winsByPosition[2] || 0) / config.games * 100).toFixed(1)}%</strong></p>
+          `;
+        },
+        getMoral: (config, stats) => `
+          <h2>💡 Ce que ça nous apprend</h2>
+          <p class="quote">
+            🏆 Le premier joueur a un <strong>avantage structurel</strong>.<br><br>
+            Même si le jeu semble "équitable", l'ordre de passage compte énormément.<br>
+            C'est vrai dans les enchères, les entretiens d'embauche, et bien d'autres situations.<br><br>
+            <strong>L'ordre d'arrivée est souvent plus important que le talent.</strong>
+          </p>
+        `
+      },
+      streak: {
+        getStory: (config, stats, dist) => {
+          const luckyCount = dist.get(1) || 0;
+          const bonusType = config.streakBonus > 0 ? 'augmente' : 'diminue';
+          return `
+            <h2>📖 L'Histoire - Streaks</h2>
+            <p>La probabilité de base est <span class="highlight">1/${config.totalBalls}</span>.</p>
+            <p>Mais après chaque échec, elle <strong>${bonusType} de ${Math.abs(config.streakBonus)}%</strong>!</p>
+            <p>${config.streakBonus > 0 ? '🔥 Main chaude: les échecs augmentent vos chances' : '❄️ Main froide: les échecs diminuent vos chances'}</p>
+            <br>
+            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> ont réussi du premier coup</p>
+            <p>😅 Le plus malchanceux: <strong>${stats.max.toLocaleString()}</strong> tentatives</p>
+          `;
+        },
+        getMoral: (config, stats) => `
+          <h2>💡 Ce que ça nous apprend</h2>
+          <p class="quote">
+            🎲 Le "Gambler's Fallacy" est l'idée que les probabilités changent après une série.<br><br>
+            ${config.streakBonus > 0
+              ? 'Ici la chance AUGMENTE vraiment après chaque échec - mais dans la vraie vie, <strong>chaque lancer est indépendant</strong>!'
+              : 'Ici la chance DIMINUE - comme certains systèmes injustes où "les pauvres restent pauvres".'}<br><br>
+            <strong>Ne confondez pas les patterns avec la causalité.</strong>
+          </p>
+        `
+      },
+      economy: {
+        getStory: (config, stats, dist) => {
+          const avgCost = stats.average * config.cost;
+          const profitable = config.reward > avgCost;
+          const profitPercent = ((config.reward - avgCost) / avgCost * 100).toFixed(1);
+          return `
+            <h2>📖 L'Histoire - Économie</h2>
+            <p>Chaque tentative coûte <span class="highlight">${config.cost}€</span>.</p>
+            <p>Trouver la boule bleue rapporte <span class="highlight">${config.reward}€</span>!</p>
+            <p>Probabilité: 1/${config.totalBalls} (espérance: ${config.totalBalls} essais)</p>
+            <br>
+            <p>💸 Coût moyen pour gagner: <strong>${avgCost.toFixed(0)}€</strong></p>
+            <p>💰 Gain net moyen: <strong style="color:${profitable ? '#4ade80' : '#f97316'}">${(config.reward - avgCost).toFixed(0)}€</strong></p>
+            <p>${profitable ? '📈' : '📉'} ROI: <strong>${profitPercent}%</strong></p>
+          `;
+        },
+        getMoral: (config, stats) => {
+          const avgCost = stats.average * config.cost;
+          const profitable = config.reward > avgCost;
+          return `
+            <h2>💡 Ce que ça nous apprend</h2>
+            <p class="quote">
+              ${profitable
+                ? '✅ Ce jeu est <strong>mathématiquement rentable</strong> sur le long terme!'
+                : '❌ Ce jeu est <strong>mathématiquement perdant</strong>. La maison gagne toujours.'}<br><br>
+              Espérance = Récompense - (Coût × Essais moyens)<br>
+              = ${config.reward}€ - (${config.cost}€ × ${stats.average.toFixed(0)}) = <strong>${(config.reward - avgCost).toFixed(0)}€</strong><br><br>
+              <strong>C'est pourquoi les casinos et loteries fixent leurs prix avec soin.</strong>
+            </p>
+          `;
+        }
+      },
+      multi: {
+        getStory: (config, stats, dist) => {
+          const luckyCount = dist.get(config.targetBalls) || 0;
+          return `
+            <h2>📖 L'Histoire - Multi-cibles</h2>
+            <p>Cette fois, il faut trouver <span class="highlight">${config.targetBalls} boules bleues</span>!</p>
+            <p>Le sac contient ${config.totalBalls} boules (${config.blueBalls} bleues). Avec remise.</p>
+            <p>Probabilité par tirage: 1/${config.totalBalls}</p>
+            <br>
+            <p>🍀 Le plus chanceux: <strong>${stats.min}</strong> tentatives</p>
+            <p>😅 Le plus malchanceux: <strong>${stats.max.toLocaleString()}</strong> tentatives</p>
+            <p>📊 Moyenne: <strong>${stats.average.toFixed(0)}</strong> tentatives</p>
+          `;
+        },
+        getMoral: (config, stats) => `
+          <h2>💡 Ce que ça nous apprend</h2>
+          <p class="quote">
+            📈 Trouver ${config.targetBalls} boules prend ~${config.targetBalls}x plus de temps qu'une seule!<br><br>
+            C'est la <strong>linéarité de l'espérance</strong>: E[X₁+X₂+...] = E[X₁] + E[X₂] + ...<br>
+            Mais la variance augmente aussi - les écarts deviennent plus extrêmes.<br><br>
+            <strong>Les objectifs ambitieux demandent une persévérance proportionnelle.</strong>
+          </p>
+        `
+      }
+    };
+
+    // Simulation functions
+    function simulateReplacement(config) {
+      const results = [];
+      for (let i = 0; i < config.players; i++) {
+        let attempts = 0;
+        while (true) {
+          attempts++;
+          if (Math.floor(Math.random() * config.totalBalls) < config.blueBalls) break;
+        }
+        results.push(attempts);
+      }
+      return results;
+    }
+
+    function simulateNoReplacement(config) {
+      const results = [];
+      for (let i = 0; i < config.players; i++) {
+        let remaining = config.totalBalls;
+        let blueLeft = config.blueBalls;
+        let attempts = 0;
+        while (blueLeft > 0) {
+          attempts++;
+          if (Math.floor(Math.random() * remaining) < blueLeft) break;
+          remaining--;
+        }
+        results.push(attempts);
+      }
+      return results;
+    }
+
+    function simulatePity(config) {
+      const results = [];
+      const baseProb = config.blueBalls / config.totalBalls;
+      for (let i = 0; i < config.players; i++) {
+        let attempts = 0;
+        while (true) {
+          attempts++;
+          let prob = baseProb;
+          if (attempts > config.pityStart) {
+            const progress = (attempts - config.pityStart) / (config.pityGuarantee - config.pityStart);
+            prob = baseProb + (1 - baseProb) * Math.min(1, progress);
+          }
+          if (Math.random() < prob) break;
+        }
+        results.push(attempts);
+      }
+      return results;
+    }
+
+    function simulateCompetition(config) {
+      const games = Math.floor(config.players / config.playersPerGame);
+      const winsByPosition = new Array(config.playersPerGame).fill(0);
+      const results = [];
+
+      for (let g = 0; g < games; g++) {
+        let remaining = config.totalBalls;
+        let blueLeft = config.blueBalls;
+        let turn = 0;
+        let totalAttempts = 0;
+
+        while (blueLeft > 0 && remaining > 0) {
+          totalAttempts++;
+          const playerIndex = turn % config.playersPerGame;
+          if (Math.floor(Math.random() * remaining) < blueLeft) {
+            winsByPosition[playerIndex]++;
+            results.push(playerIndex + 1); // Winner position
+            break;
+          }
+          remaining--;
+          turn++;
+        }
+      }
+
+      config.games = games;
+      config.winsByPosition = winsByPosition;
+      return results;
+    }
+
+    function simulateStreak(config) {
+      const results = [];
+      const baseProb = config.blueBalls / config.totalBalls;
+      for (let i = 0; i < config.players; i++) {
+        let attempts = 0;
+        let streak = 0;
+        while (true) {
+          attempts++;
+          const modifier = 1 + (streak * config.streakBonus / 100);
+          const prob = Math.min(1, Math.max(0, baseProb * modifier));
+          if (Math.random() < prob) break;
+          streak++;
+        }
+        results.push(attempts);
+      }
+      return results;
+    }
+
+    function simulateEconomy(config) {
+      // Same as replacement, but we track cost
+      return simulateReplacement(config);
+    }
+
+    function simulateMulti(config) {
+      const results = [];
+      for (let i = 0; i < config.players; i++) {
+        let attempts = 0;
+        let found = 0;
+        while (found < config.targetBalls) {
+          attempts++;
+          if (Math.floor(Math.random() * config.totalBalls) < config.blueBalls) {
+            found++;
+          }
+        }
+        results.push(attempts);
+      }
+      return results;
+    }
+
+    // Calculate stats
+    function calculateStats(results) {
+      const sorted = [...results].sort((a, b) => a - b);
+      const sum = results.reduce((a, b) => a + b, 0);
+      const count = results.length;
+      return {
+        count,
+        min: sorted[0],
+        max: sorted[count - 1],
+        average: sum / count,
+        median: count % 2 === 0
+          ? (sorted[count/2 - 1] + sorted[count/2]) / 2
+          : sorted[Math.floor(count/2)]
+      };
+    }
+
+    function buildDistribution(results) {
+      const dist = new Map();
+      for (const r of results) {
+        dist.set(r, (dist.get(r) || 0) + 1);
+      }
+      return new Map([...dist].sort((a, b) => a[0] - b[0]));
+    }
+
+    // UI functions
+    function selectMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+
+      // Show/hide mode-specific configs
+      document.querySelectorAll('[id$="-config"]').forEach(el => el.style.display = 'none');
+      (modeConfigs[mode]?.showConfigs || []).forEach(id => {
+        document.getElementById(id).style.display = 'block';
+      });
+    }
+
+    function getConfig() {
+      const redBalls = parseInt(document.getElementById('redBalls').value);
+      const blueBalls = parseInt(document.getElementById('blueBalls').value);
+      return {
+        players: parseInt(document.getElementById('players').value),
+        redBalls,
+        blueBalls,
+        totalBalls: redBalls + blueBalls,
+        pityStart: parseInt(document.getElementById('pityStart').value),
+        pityGuarantee: parseInt(document.getElementById('pityGuarantee').value),
+        playersPerGame: parseInt(document.getElementById('playersPerGame').value),
+        streakBonus: parseInt(document.getElementById('streakBonus').value),
+        cost: parseInt(document.getElementById('cost').value),
+        reward: parseInt(document.getElementById('reward').value),
+        targetBalls: parseInt(document.getElementById('targetBalls').value)
+      };
+    }
+
+    function updateCharts(distribution, stats) {
+      const labels = [...distribution.keys()].slice(0, 100);
+      const values = [...distribution.values()].slice(0, 100);
+
+      let cumulative = 0;
+      const cumulativeData = values.map(v => {
+        cumulative += v;
+        return (cumulative / stats.count * 100).toFixed(2);
+      });
+
+      const chartOptions = {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+          y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+        }
+      };
+
+      if (distributionChart) distributionChart.destroy();
+      distributionChart = new Chart(document.getElementById('distributionChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: 'rgba(233, 69, 96, 0.7)',
+            borderColor: 'rgba(233, 69, 96, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: chartOptions
+      });
+
+      if (cumulativeChart) cumulativeChart.destroy();
+      cumulativeChart = new Chart(document.getElementById('cumulativeChart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: cumulativeData,
+            borderColor: 'rgba(74, 222, 128, 1)',
+            backgroundColor: 'rgba(74, 222, 128, 0.1)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, min: 0, max: 100 } } }
+      });
+    }
+
+    function updateStats(stats, distribution, config) {
+      // Percentiles
+      let cumulative = 0;
+      let p50 = 0, p90 = 0, p99 = 0;
+      for (const [attempts, count] of distribution) {
+        cumulative += count;
+        if (!p50 && cumulative >= stats.count * 0.5) p50 = attempts;
+        if (!p90 && cumulative >= stats.count * 0.9) p90 = attempts;
+        if (!p99 && cumulative >= stats.count * 0.99) p99 = attempts;
+      }
+
+      const luckyCount = distribution.get(1) || distribution.get(stats.min) || 0;
+
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-card lucky"><div class="value">🍀 ${luckyCount.toLocaleString()}</div><div class="label">Chanceux</div></div>
+        <div class="stat-card unlucky"><div class="value">😅 ${stats.max.toLocaleString()}</div><div class="label">Max tentatives</div></div>
+        <div class="stat-card"><div class="value">${stats.average.toFixed(1)}</div><div class="label">Moyenne</div></div>
+        <div class="stat-card"><div class="value">${stats.median}</div><div class="label">Médiane</div></div>
+        <div class="stat-card"><div class="value">${p50}</div><div class="label">50% en ≤</div></div>
+        <div class="stat-card"><div class="value">${p90}</div><div class="label">90% en ≤</div></div>
+      `;
+    }
+
+    async function runSimulation() {
+      const btn = document.getElementById('runBtn');
+      const progressBar = document.getElementById('progressBar');
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Simulation en cours...';
+      progressBar.classList.add('visible');
+      progressBar.querySelector('.fill').style.width = '30%';
+
+      await new Promise(r => setTimeout(r, 50)); // Let UI update
+
+      const config = getConfig();
+      let results;
+
+      // Run simulation
+      switch (currentMode) {
+        case 'replacement': results = simulateReplacement(config); break;
+        case 'no-replacement': results = simulateNoReplacement(config); break;
+        case 'pity': results = simulatePity(config); break;
+        case 'competition': results = simulateCompetition(config); break;
+        case 'streak': results = simulateStreak(config); break;
+        case 'economy': results = simulateEconomy(config); break;
+        case 'multi': results = simulateMulti(config); break;
+      }
+
+      progressBar.querySelector('.fill').style.width = '70%';
+      await new Promise(r => setTimeout(r, 50));
+
+      const stats = calculateStats(results);
+      const distribution = buildDistribution(results);
+
+      progressBar.querySelector('.fill').style.width = '100%';
+
+      // Update UI
+      const content = modeContent[currentMode];
+      document.getElementById('storyBox').innerHTML = content.getStory(config, stats, distribution);
+      document.getElementById('moralBox').innerHTML = content.getMoral(config, stats);
+      updateStats(stats, distribution, config);
+      updateCharts(distribution, stats);
+
+      document.getElementById('placeholder').style.display = 'none';
+      document.getElementById('results').classList.add('visible');
+
+      btn.disabled = false;
+      btn.textContent = '▶️ Lancer la simulation';
+      setTimeout(() => progressBar.classList.remove('visible'), 500);
+    }
+
+    // Event listeners
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => selectMode(btn.dataset.mode));
+    });
+
+    document.getElementById('runBtn').addEventListener('click', runSimulation);
+
+    // Initialize
+    selectMode('replacement');
+  </script>
+</body>
+</html>
