@@ -18,9 +18,36 @@
       text-align: center;
       padding: 2rem;
       background: rgba(0,0,0,0.3);
+      position: relative;
     }
     .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
     .header p { color: #888; }
+
+    .lang-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.25rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.25rem;
+    }
+    .lang-btn {
+      padding: 0.5rem 0.75rem;
+      border: none;
+      background: transparent;
+      color: #888;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { color: #eee; }
+    .lang-btn.active {
+      background: #e94560;
+      color: white;
+    }
 
     .main-container {
       display: grid;
@@ -225,114 +252,118 @@
 </head>
 <body>
   <div class="header">
-    <h1>🎲 Simulateur de Probabilités</h1>
-    <p>Explore différents scénarios et découvre ce que les statistiques nous apprennent</p>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <h1 id="mainTitle">🎲 Simulateur de Probabilités</h1>
+    <p id="mainSubtitle">Explore différents scénarios et découvre ce que les statistiques nous apprennent</p>
   </div>
 
   <div class="main-container">
     <div class="sidebar">
-      <h3>🎮 Mode de jeu</h3>
+      <h3 id="modeTitle">🎮 Mode de jeu</h3>
       <div class="mode-selector">
         <button class="mode-btn active" data-mode="replacement">
           <span class="mode-icon">🔄</span>
-          <span class="mode-name">Avec remise</span>
-          <span class="mode-desc">La boule retourne dans le sac</span>
+          <span class="mode-name" data-i18n="mode.replacement.name">Avec remise</span>
+          <span class="mode-desc" data-i18n="mode.replacement.desc">La boule retourne dans le sac</span>
         </button>
         <button class="mode-btn" data-mode="no-replacement">
           <span class="mode-icon">🎯</span>
-          <span class="mode-name">Sans remise</span>
-          <span class="mode-desc">La boule est gardée</span>
+          <span class="mode-name" data-i18n="mode.noReplacement.name">Sans remise</span>
+          <span class="mode-desc" data-i18n="mode.noReplacement.desc">La boule est gardée</span>
         </button>
         <button class="mode-btn" data-mode="pity">
           <span class="mode-icon">🎰</span>
-          <span class="mode-name">Pity System</span>
-          <span class="mode-desc">Garantie après X échecs</span>
+          <span class="mode-name" data-i18n="mode.pity.name">Pity System</span>
+          <span class="mode-desc" data-i18n="mode.pity.desc">Garantie après X échecs</span>
         </button>
         <button class="mode-btn" data-mode="competition">
           <span class="mode-icon">🏆</span>
-          <span class="mode-name">Compétition</span>
-          <span class="mode-desc">Course au premier</span>
+          <span class="mode-name" data-i18n="mode.competition.name">Compétition</span>
+          <span class="mode-desc" data-i18n="mode.competition.desc">Course au premier</span>
         </button>
         <button class="mode-btn" data-mode="streak">
           <span class="mode-icon">🔥</span>
-          <span class="mode-name">Streaks</span>
-          <span class="mode-desc">Main chaude / froide</span>
+          <span class="mode-name" data-i18n="mode.streak.name">Streaks</span>
+          <span class="mode-desc" data-i18n="mode.streak.desc">Main chaude / froide</span>
         </button>
         <button class="mode-btn" data-mode="economy">
           <span class="mode-icon">💰</span>
-          <span class="mode-name">Économie</span>
-          <span class="mode-desc">Coût vs Récompense</span>
+          <span class="mode-name" data-i18n="mode.economy.name">Économie</span>
+          <span class="mode-desc" data-i18n="mode.economy.desc">Coût vs Récompense</span>
         </button>
         <button class="mode-btn" data-mode="multi">
           <span class="mode-icon">🎯</span>
-          <span class="mode-name">Multi-cibles</span>
-          <span class="mode-desc">Trouver N boules bleues</span>
+          <span class="mode-name" data-i18n="mode.multi.name">Multi-cibles</span>
+          <span class="mode-desc" data-i18n="mode.multi.desc">Trouver N boules bleues</span>
         </button>
       </div>
 
-      <h3>⚙️ Configuration</h3>
+      <h3 id="configTitle">⚙️ Configuration</h3>
 
       <div class="config-section">
-        <label>Nombre de joueurs</label>
+        <label data-i18n="config.players">Nombre de joueurs</label>
         <input type="number" id="players" value="100000" min="1000" max="1000000" step="1000">
       </div>
 
       <div class="config-group">
         <div class="config-section">
-          <label>Boules rouges</label>
+          <label data-i18n="config.redBalls">Boules rouges</label>
           <input type="number" id="redBalls" value="499" min="1" max="9999">
         </div>
         <div class="config-section">
-          <label>Boules bleues</label>
+          <label data-i18n="config.blueBalls">Boules bleues</label>
           <input type="number" id="blueBalls" value="1" min="1" max="100">
         </div>
       </div>
 
       <!-- Mode-specific configs -->
       <div id="pity-config" class="config-section" style="display:none;">
-        <label>Pity démarre après</label>
+        <label data-i18n="config.pityStart">Pity démarre après</label>
         <input type="number" id="pityStart" value="50" min="1">
-        <label style="margin-top:0.5rem;">Garantie à</label>
+        <label style="margin-top:0.5rem;" data-i18n="config.pityGuarantee">Garantie à</label>
         <input type="number" id="pityGuarantee" value="90" min="1">
       </div>
 
       <div id="competition-config" class="config-section" style="display:none;">
-        <label>Joueurs par partie</label>
+        <label data-i18n="config.playersPerGame">Joueurs par partie</label>
         <input type="number" id="playersPerGame" value="10" min="2" max="100">
       </div>
 
       <div id="streak-config" class="config-section" style="display:none;">
-        <label>Bonus/Malus par streak (%)</label>
+        <label data-i18n="config.streakBonus">Bonus/Malus par streak (%)</label>
         <input type="number" id="streakBonus" value="10" min="-50" max="50">
       </div>
 
       <div id="economy-config" class="config-section" style="display:none;">
         <div class="config-group">
           <div>
-            <label>Coût par essai</label>
+            <label data-i18n="config.cost">Coût par essai</label>
             <input type="number" id="cost" value="1" min="1">
           </div>
           <div>
-            <label>Récompense</label>
+            <label data-i18n="config.reward">Récompense</label>
             <input type="number" id="reward" value="400" min="1">
           </div>
         </div>
       </div>
 
       <div id="multi-config" class="config-section" style="display:none;">
-        <label>Boules bleues à trouver</label>
+        <label data-i18n="config.targetBalls">Boules bleues à trouver</label>
         <input type="number" id="targetBalls" value="3" min="1" max="10">
       </div>
 
-      <button class="run-btn" id="runBtn">▶️ Lancer la simulation</button>
+      <button class="run-btn" id="runBtn" data-i18n="ui.runBtn">▶️ Lancer la simulation</button>
       <div class="progress-bar" id="progressBar"><div class="fill"></div></div>
     </div>
 
     <div class="content">
       <div class="placeholder" id="placeholder">
         <div class="icon">🎲</div>
-        <h2>Choisis un mode et lance la simulation</h2>
-        <p style="margin-top:0.5rem;">Les résultats apparaîtront ici</p>
+        <h2 data-i18n="ui.placeholder.title">Choisis un mode et lance la simulation</h2>
+        <p style="margin-top:0.5rem;" data-i18n="ui.placeholder.subtitle">Les résultats apparaîtront ici</p>
       </div>
 
       <div class="results" id="results">
@@ -341,12 +372,12 @@
 
         <div class="charts-row">
           <div class="chart-container">
-            <h3>📊 Distribution</h3>
+            <h3 data-i18n="ui.chart.distribution">📊 Distribution</h3>
             <canvas id="distributionChart"></canvas>
             <div class="chart-explanation" id="distExplanation"></div>
           </div>
           <div class="chart-container">
-            <h3>📈 Cumul</h3>
+            <h3 data-i18n="ui.chart.cumulative">📈 Cumul</h3>
             <canvas id="cumulativeChart"></canvas>
             <div class="chart-explanation" id="cumulExplanation"></div>
           </div>
@@ -361,8 +392,118 @@
   <script>
     // State
     let currentMode = 'replacement';
+    let currentLang = 'fr';
     let distributionChart = null;
     let cumulativeChart = null;
+
+    // Translations
+    const translations = {
+      fr: {
+        title: '🎲 Simulateur de Probabilités',
+        subtitle: 'Explore différents scénarios et découvre ce que les statistiques nous apprennent',
+        modeTitle: '🎮 Mode de jeu',
+        configTitle: '⚙️ Configuration',
+        mode: {
+          replacement: { name: 'Avec remise', desc: 'La boule retourne dans le sac' },
+          noReplacement: { name: 'Sans remise', desc: 'La boule est gardée' },
+          pity: { name: 'Pity System', desc: 'Garantie après X échecs' },
+          competition: { name: 'Compétition', desc: 'Course au premier' },
+          streak: { name: 'Streaks', desc: 'Main chaude / froide' },
+          economy: { name: 'Économie', desc: 'Coût vs Récompense' },
+          multi: { name: 'Multi-cibles', desc: 'Trouver N boules bleues' }
+        },
+        config: {
+          players: 'Nombre de joueurs',
+          redBalls: 'Boules rouges',
+          blueBalls: 'Boules bleues',
+          pityStart: 'Pity démarre après',
+          pityGuarantee: 'Garantie à',
+          playersPerGame: 'Joueurs par partie',
+          streakBonus: 'Bonus/Malus par streak (%)',
+          cost: 'Coût par essai',
+          reward: 'Récompense',
+          targetBalls: 'Boules bleues à trouver'
+        },
+        ui: {
+          runBtn: '▶️ Lancer la simulation',
+          runningBtn: '⏳ Simulation...',
+          placeholder: { title: 'Choisis un mode et lance la simulation', subtitle: 'Les résultats apparaîtront ici' },
+          chart: { distribution: '📊 Distribution', cumulative: '📈 Cumul' },
+          stats: { lucky: 'Chanceux', max: 'Max', average: 'Moyenne', median: 'Médiane', p50: '50% en ≤', p90: '90% en ≤' }
+        },
+        balls: 'boules',
+        ball: 'boule',
+        attempts: 'tentatives',
+        attempt: 'tentative',
+        players: 'joueurs',
+        player: 'joueur',
+        games: 'parties'
+      },
+      en: {
+        title: '🎲 Probability Simulator',
+        subtitle: 'Explore different scenarios and discover what statistics teach us',
+        modeTitle: '🎮 Game Mode',
+        configTitle: '⚙️ Configuration',
+        mode: {
+          replacement: { name: 'With replacement', desc: 'Ball goes back in the bag' },
+          noReplacement: { name: 'Without replacement', desc: 'Ball is kept' },
+          pity: { name: 'Pity System', desc: 'Guaranteed after X failures' },
+          competition: { name: 'Competition', desc: 'Race to first' },
+          streak: { name: 'Streaks', desc: 'Hot / cold hand' },
+          economy: { name: 'Economy', desc: 'Cost vs Reward' },
+          multi: { name: 'Multi-target', desc: 'Find N blue balls' }
+        },
+        config: {
+          players: 'Number of players',
+          redBalls: 'Red balls',
+          blueBalls: 'Blue balls',
+          pityStart: 'Pity starts after',
+          pityGuarantee: 'Guaranteed at',
+          playersPerGame: 'Players per game',
+          streakBonus: 'Bonus/Malus per streak (%)',
+          cost: 'Cost per try',
+          reward: 'Reward',
+          targetBalls: 'Blue balls to find'
+        },
+        ui: {
+          runBtn: '▶️ Run simulation',
+          runningBtn: '⏳ Simulating...',
+          placeholder: { title: 'Choose a mode and run the simulation', subtitle: 'Results will appear here' },
+          chart: { distribution: '📊 Distribution', cumulative: '📈 Cumulative' },
+          stats: { lucky: 'Lucky', max: 'Max', average: 'Average', median: 'Median', p50: '50% in ≤', p90: '90% in ≤' }
+        },
+        balls: 'balls',
+        ball: 'ball',
+        attempts: 'attempts',
+        attempt: 'attempt',
+        players: 'players',
+        player: 'player',
+        games: 'games'
+      }
+    };
+
+    function t(key) {
+      const keys = key.split('.');
+      let value = translations[currentLang];
+      for (const k of keys) {
+        value = value?.[k];
+      }
+      return value || key;
+    }
+
+    function updateStaticUI() {
+      document.getElementById('mainTitle').textContent = t('title');
+      document.getElementById('mainSubtitle').textContent = t('subtitle');
+      document.getElementById('modeTitle').textContent = t('modeTitle');
+      document.getElementById('configTitle').textContent = t('configTitle');
+      document.getElementById('runBtn').textContent = t('ui.runBtn');
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        const text = t(key);
+        if (text && text !== key) el.textContent = text;
+      });
+    }
 
     // Mode configurations
     const modeConfigs = {
@@ -375,266 +516,265 @@
       multi: { showConfigs: ['multi-config'] }
     };
 
-    // Mode stories and morals
-    const modeContent = {
-      replacement: {
-        getStory: (config, stats, dist) => {
-          const luckyCount = dist.get(1) || 0;
-          return `
-            <h2>📖 L'Histoire</h2>
-            <p>Imagine un sac contenant <span class="highlight">${config.totalBalls} boules</span>:
-               ${config.redBalls} 🔴 rouges et ${config.blueBalls} 🔵 bleue(s).</p>
-            <p><span class="highlight">${config.players.toLocaleString()}</span> joueurs vont tenter leur chance.</p>
-            <p>Chacun pioche une boule au hasard, <strong>la remet dans le sac</strong>, et recommence jusqu'à trouver la bleue.</p>
-            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux ont trouvé du premier coup!
-               😅 Le plus malchanceux: <strong>${stats.max.toLocaleString()}</strong> tentatives.</p>
-          `;
+    // Mode stories and morals - bilingual
+    function getModeContent(mode) {
+      const content = {
+        replacement: {
+          fr: {
+            storyTitle: "📖 L'Histoire",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              return `<p>Imagine un sac contenant <span class="highlight">${c.totalBalls} boules</span>: ${c.redBalls} 🔴 rouges et ${c.blueBalls} 🔵 bleue(s).</p>
+              <p><span class="highlight">${c.players.toLocaleString()}</span> joueurs vont tenter leur chance.</p>
+              <p>Chacun pioche une boule au hasard, <strong>la remet dans le sac</strong>, et recommence jusqu'à trouver la bleue.</p>
+              <p>🍀 <strong>${lucky.toLocaleString()}</strong> chanceux ont trouvé du premier coup! 😅 Le plus malchanceux: <strong>${s.max.toLocaleString()}</strong> tentatives.</p>`;
+            },
+            distExp: (c, s) => `<strong>Ce graphique montre combien de joueurs ont eu besoin de X tentatives.</strong> La barre la plus haute est à gauche (1 tentative) et décroît exponentiellement. C'est la "distribution géométrique" - typique des jeux de hasard avec remise.`,
+            cumulExp: (c, s, p50, p90) => `<strong>Ce graphique montre le % de joueurs ayant réussi en X tentatives ou moins.</strong> À ${p50} tentatives, 50% ont réussi. À ${p90}, c'est 90%. La courbe monte vite au début puis ralentit - les derniers % sont les plus durs!`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c, s) => `<p>Imagine que tu cherches une bille bleue dans un sac de ${c.totalBalls} billes. Tu pioches, tu regardes, et tu remets la bille dans le sac. Puis tu recommences!</p><p>Certains ont beaucoup de chance et trouvent tout de suite. D'autres doivent essayer plein de fois - jusqu'à ${s.max.toLocaleString()} fois pour le moins chanceux!</p><p><strong>Mais tu sais quoi? À la fin, TOUT LE MONDE trouve la bille bleue.</strong> Il faut juste être patient! 🎉</p>`,
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: () => `<p class="quote">🎯 La chance détermine le "quand", pas le "si".<br><strong>Celui qui persévère gagne toujours.</strong></p>`
+          },
+          en: {
+            storyTitle: "📖 The Story",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              return `<p>Imagine a bag containing <span class="highlight">${c.totalBalls} balls</span>: ${c.redBalls} 🔴 red and ${c.blueBalls} 🔵 blue.</p>
+              <p><span class="highlight">${c.players.toLocaleString()}</span> players will try their luck.</p>
+              <p>Each one picks a ball at random, <strong>puts it back in the bag</strong>, and tries again until they find the blue one.</p>
+              <p>🍀 <strong>${lucky.toLocaleString()}</strong> lucky ones found it on the first try! 😅 The unluckiest: <strong>${s.max.toLocaleString()}</strong> attempts.</p>`;
+            },
+            distExp: (c, s) => `<strong>This chart shows how many players needed X attempts.</strong> The highest bar is on the left (1 attempt) and decreases exponentially. This is the "geometric distribution" - typical of games of chance with replacement.`,
+            cumulExp: (c, s, p50, p90) => `<strong>This chart shows the % of players who succeeded in X attempts or less.</strong> At ${p50} attempts, 50% succeeded. At ${p90}, it's 90%. The curve rises quickly at first then slows - the last % are the hardest!`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c, s) => `<p>Imagine you're looking for a blue marble in a bag of ${c.totalBalls} marbles. You pick one, look at it, and put it back in the bag. Then you try again!</p><p>Some people are very lucky and find it right away. Others have to try many times - up to ${s.max.toLocaleString()} times for the unluckiest!</p><p><strong>But guess what? In the end, EVERYONE finds the blue marble.</strong> You just need to be patient! 🎉</p>`,
+            moralTitle: "💡 What this teaches us",
+            moral: () => `<p class="quote">🎯 Luck determines "when", not "if".<br><strong>Those who persevere always win.</strong></p>`
+          }
         },
-        getDistExplanation: (config, stats) => `
-          <strong>Ce graphique montre combien de joueurs ont eu besoin de X tentatives.</strong>
-          La barre la plus haute est à gauche (1 tentative) et décroît exponentiellement.
-          C'est la "distribution géométrique" - typique des jeux de hasard avec remise.
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>Ce graphique montre le % de joueurs ayant réussi en X tentatives ou moins.</strong>
-          À ${p50} tentatives, 50% ont réussi. À ${p90}, c'est 90%.
-          La courbe monte vite au début puis ralentit - les derniers % sont les plus durs!
-        `,
-        getChildExplanation: (config, stats) => `
-          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-          <p>Imagine que tu cherches une bille bleue dans un sac de ${config.totalBalls} billes. Tu pioches, tu regardes, et tu remets la bille dans le sac. Puis tu recommences!</p>
-          <p>Certains ont beaucoup de chance et trouvent tout de suite. D'autres doivent essayer plein de fois - jusqu'à ${stats.max.toLocaleString()} fois pour le moins chanceux!</p>
-          <p><strong>Mais tu sais quoi? À la fin, TOUT LE MONDE trouve la bille bleue.</strong> Il faut juste être patient! 🎉</p>
-        `,
-        getMoral: (config, stats) => `
-          <h2>💡 Ce que ça nous apprend</h2>
-          <p class="quote">
-            🎯 La chance détermine le "quand", pas le "si".<br>
-            <strong>Celui qui persévère gagne toujours.</strong>
-          </p>
-        `
-      },
-      'no-replacement': {
-        getStory: (config, stats, dist) => {
-          const luckyCount = dist.get(1) || 0;
-          return `
-            <h2>📖 L'Histoire</h2>
-            <p>Même sac de <span class="highlight">${config.totalBalls} boules</span>, mais cette fois on <strong>garde</strong> chaque boule piochée!</p>
-            <p>La probabilité augmente à chaque tirage. Maximum ${config.totalBalls} tentatives possible.</p>
-            <p>🍀 <strong>${luckyCount.toLocaleString()}</strong> chanceux au 1er coup!
-               😅 Le plus malchanceux: <strong>${stats.max}</strong>/${config.totalBalls} tentatives.</p>
-          `;
+        'no-replacement': {
+          fr: {
+            storyTitle: "📖 L'Histoire",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              return `<p>Même sac de <span class="highlight">${c.totalBalls} boules</span>, mais cette fois on <strong>garde</strong> chaque boule piochée!</p>
+              <p>La probabilité augmente à chaque tirage. Maximum ${c.totalBalls} tentatives possible.</p>
+              <p>🍀 <strong>${lucky.toLocaleString()}</strong> chanceux au 1er coup! 😅 Le plus malchanceux: <strong>${s.max}</strong>/${c.totalBalls} tentatives.</p>`;
+            },
+            distExp: () => `<strong>Distribution plus "plate" qu'avec remise.</strong> Chaque nombre de tentatives a presque la même probabilité! C'est la "distribution uniforme" - chaque position dans le sac est équiprobable.`,
+            cumulExp: (c, s, p50) => `<strong>Ligne presque droite = progression régulière.</strong> À ${p50} tentatives, 50% ont réussi. La médiane est proche de ${c.totalBalls}/2. Contrairement au mode "avec remise", pas de longue traîne!`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c, s) => `<p>Cette fois, quand tu pioches une bille rouge, tu la gardes au lieu de la remettre!</p><p>C'est comme si le sac devenait de plus en plus petit. Au bout d'un moment, il ne reste que la bille bleue!</p><p><strong>Le plus malchanceux a dû vider presque tout le sac (${s.max} billes), mais au moins il y a une limite!</strong> C'est plus "juste" 🤗</p>`,
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: (c) => `<p class="quote">✅ Sans remise, victoire GARANTIE en ${c.totalBalls} essais max.<br><strong>Le système protège contre la malchance extrême.</strong></p>`
+          },
+          en: {
+            storyTitle: "📖 The Story",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              return `<p>Same bag of <span class="highlight">${c.totalBalls} balls</span>, but this time you <strong>keep</strong> each ball you pick!</p>
+              <p>The probability increases with each draw. Maximum ${c.totalBalls} attempts possible.</p>
+              <p>🍀 <strong>${lucky.toLocaleString()}</strong> lucky on 1st try! 😅 Unluckiest: <strong>${s.max}</strong>/${c.totalBalls} attempts.</p>`;
+            },
+            distExp: () => `<strong>"Flatter" distribution than with replacement.</strong> Each number of attempts has almost the same probability! This is the "uniform distribution" - each position in the bag is equally likely.`,
+            cumulExp: (c, s, p50) => `<strong>Almost straight line = regular progression.</strong> At ${p50} attempts, 50% succeeded. The median is close to ${c.totalBalls}/2. Unlike "with replacement" mode, no long tail!`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c, s) => `<p>This time, when you pick a red marble, you keep it instead of putting it back!</p><p>It's like the bag gets smaller and smaller. Eventually, only the blue marble is left!</p><p><strong>The unluckiest had to empty almost the entire bag (${s.max} marbles), but at least there's a limit!</strong> It's more "fair" 🤗</p>`,
+            moralTitle: "💡 What this teaches us",
+            moral: (c) => `<p class="quote">✅ Without replacement, victory is GUARANTEED in ${c.totalBalls} tries max.<br><strong>The system protects against extreme bad luck.</strong></p>`
+          }
         },
-        getDistExplanation: (config, stats) => `
-          <strong>Distribution plus "plate" qu'avec remise.</strong>
-          Chaque nombre de tentatives a presque la même probabilité!
-          C'est la "distribution uniforme" - chaque position dans le sac est équiprobable.
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>Ligne presque droite = progression régulière.</strong>
-          À ${p50} tentatives, 50% ont réussi. La médiane est proche de ${config.totalBalls}/2.
-          Contrairement au mode "avec remise", pas de longue traîne!
-        `,
-        getChildExplanation: (config, stats) => `
-          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-          <p>Cette fois, quand tu pioches une bille rouge, tu la gardes au lieu de la remettre!</p>
-          <p>C'est comme si le sac devenait de plus en plus petit. Au bout d'un moment, il ne reste que la bille bleue!</p>
-          <p><strong>Le plus malchanceux a dû vider presque tout le sac (${stats.max} billes), mais au moins il y a une limite!</strong> C'est plus "juste" 🤗</p>
-        `,
-        getMoral: (config, stats) => `
-          <h2>💡 Ce que ça nous apprend</h2>
-          <p class="quote">
-            ✅ Sans remise, victoire GARANTIE en ${config.totalBalls} essais max.<br>
-            <strong>Le système protège contre la malchance extrême.</strong>
-          </p>
-        `
-      },
-      pity: {
-        getStory: (config, stats, dist) => {
-          const luckyCount = dist.get(1) || 0;
-          return `
-            <h2>📖 L'Histoire - Système Pity (Gacha)</h2>
-            <p>Probabilité de base: <span class="highlight">1/${config.totalBalls}</span>.
-               Après <strong>${config.pityStart}</strong> échecs, elle augmente!</p>
-            <p>À <strong>${config.pityGuarantee}</strong> tentatives = <span class="highlight">100% GARANTI</span> 🎰</p>
-            <p>🍀 ${luckyCount.toLocaleString()} chanceux naturels | 😅 Max: ${stats.max} (≤${config.pityGuarantee})</p>
-          `;
+        pity: {
+          fr: {
+            storyTitle: "📖 L'Histoire - Système Pity (Gacha)",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              return `<p>Probabilité de base: <span class="highlight">1/${c.totalBalls}</span>. Après <strong>${c.pityStart}</strong> échecs, elle augmente!</p>
+              <p>À <strong>${c.pityGuarantee}</strong> tentatives = <span class="highlight">100% GARANTI</span> 🎰</p>
+              <p>🍀 ${lucky.toLocaleString()} chanceux naturels | 😅 Max: ${s.max} (≤${c.pityGuarantee})</p>`;
+            },
+            distExp: () => `<strong>Pic vers la fin = joueurs "sauvés" par le pity.</strong> Beaucoup arrivent près de la garantie avant de gagner. C'est calculé pour maximiser les dépenses tout en évitant la frustration totale.`,
+            cumulExp: (c) => `<strong>La courbe accélère vers la fin!</strong> Contrairement au mode normal, 100% est atteint à exactement ${c.pityGuarantee} tentatives. Le pity "rattrape" tous les malchanceux.`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c) => `<p>C'est comme dans les jeux sur téléphone! Au début c'est dur de gagner...</p><p>Mais si tu n'as vraiment pas de chance, le jeu devient plus gentil et te laisse gagner après ${c.pityGuarantee} essais!</p><p><strong>Attention:</strong> Les créateurs du jeu ont calculé ça pour que tu aies ENVIE de continuer à jouer (et payer) 💸</p>`,
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: () => `<p class="quote">🎰 Le Pity donne une <strong>illusion de protection</strong>.<br><strong>C'est un outil marketing, pas un cadeau.</strong></p>`
+          },
+          en: {
+            storyTitle: "📖 The Story - Pity System (Gacha)",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              return `<p>Base probability: <span class="highlight">1/${c.totalBalls}</span>. After <strong>${c.pityStart}</strong> failures, it increases!</p>
+              <p>At <strong>${c.pityGuarantee}</strong> attempts = <span class="highlight">100% GUARANTEED</span> 🎰</p>
+              <p>🍀 ${lucky.toLocaleString()} naturally lucky | 😅 Max: ${s.max} (≤${c.pityGuarantee})</p>`;
+            },
+            distExp: () => `<strong>Spike near the end = players "saved" by pity.</strong> Many get close to the guarantee before winning. It's designed to maximize spending while avoiding total frustration.`,
+            cumulExp: (c) => `<strong>The curve accelerates at the end!</strong> Unlike normal mode, 100% is reached at exactly ${c.pityGuarantee} attempts. Pity "catches" all the unlucky ones.`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c) => `<p>It's like in mobile games! At first it's hard to win...</p><p>But if you're really unlucky, the game becomes nicer and lets you win after ${c.pityGuarantee} tries!</p><p><strong>Warning:</strong> Game creators designed this to make you WANT to keep playing (and paying) 💸</p>`,
+            moralTitle: "💡 What this teaches us",
+            moral: () => `<p class="quote">🎰 Pity gives an <strong>illusion of protection</strong>.<br><strong>It's a marketing tool, not a gift.</strong></p>`
+          }
         },
-        getDistExplanation: (config, stats) => `
-          <strong>Pic vers la fin = joueurs "sauvés" par le pity.</strong>
-          Beaucoup de gens arrivent près de la garantie avant de gagner.
-          C'est calculé pour maximiser les dépenses tout en évitant la frustration totale.
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>La courbe accélère vers la fin!</strong>
-          Contrairement au mode normal, 100% est atteint à exactement ${config.pityGuarantee} tentatives.
-          Le pity "rattrape" tous les malchanceux.
-        `,
-        getChildExplanation: (config, stats) => `
-          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-          <p>C'est comme dans les jeux sur téléphone! Au début c'est dur de gagner...</p>
-          <p>Mais si tu n'as vraiment pas de chance, le jeu devient plus gentil et te laisse gagner après ${config.pityGuarantee} essais!</p>
-          <p><strong>Attention:</strong> Les créateurs du jeu ont calculé ça pour que tu aies ENVIE de continuer à jouer (et payer) 💸</p>
-        `,
-        getMoral: (config, stats) => `
-          <h2>💡 Ce que ça nous apprend</h2>
-          <p class="quote">
-            🎰 Le Pity donne une <strong>illusion de protection</strong>.<br>
-            <strong>C'est un outil marketing, pas un cadeau.</strong>
-          </p>
-        `
-      },
-      competition: {
-        getStory: (config, stats, dist) => {
-          const winsByPosition = config.winsByPosition || [];
-          return `
-            <h2>📖 L'Histoire - Compétition</h2>
-            <p><strong>${config.playersPerGame}</strong> joueurs autour du même sac, à tour de rôle (sans remise).</p>
-            <p>Premier à trouver la 🔵 = GAGNE! (${config.games?.toLocaleString() || 0} parties jouées)</p>
-            <p>🥇 Joueur 1: <strong>${((winsByPosition[0] || 0) / (config.games || 1) * 100).toFixed(1)}%</strong> |
-               🥈 Joueur 2: <strong>${((winsByPosition[1] || 0) / (config.games || 1) * 100).toFixed(1)}%</strong> |
-               🥉 Joueur 3: <strong>${((winsByPosition[2] || 0) / (config.games || 1) * 100).toFixed(1)}%</strong></p>
-          `;
+        competition: {
+          fr: {
+            storyTitle: "📖 L'Histoire - Compétition",
+            story: (c, s, d) => {
+              const w = c.winsByPosition || [];
+              return `<p><strong>${c.playersPerGame}</strong> joueurs autour du même sac, à tour de rôle (sans remise).</p>
+              <p>Premier à trouver la 🔵 = GAGNE! (${c.games?.toLocaleString() || 0} parties jouées)</p>
+              <p>🥇 Joueur 1: <strong>${((w[0]||0)/(c.games||1)*100).toFixed(1)}%</strong> | 🥈 Joueur 2: <strong>${((w[1]||0)/(c.games||1)*100).toFixed(1)}%</strong> | 🥉 Joueur 3: <strong>${((w[2]||0)/(c.games||1)*100).toFixed(1)}%</strong></p>`;
+            },
+            distExp: () => `<strong>Ce graphique montre quelle position gagne le plus souvent.</strong> Le joueur 1 a un avantage énorme car il pioche en premier! Plus on est loin dans l'ordre, moins on a de chances.`,
+            cumulExp: () => `<strong>Cumul des victoires par position.</strong> Les premières positions accumulent rapidement les victoires. Les derniers joueurs n'ont presque jamais leur chance!`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c) => `<p>Imagine un jeu où ${c.playersPerGame} enfants piochent chacun leur tour dans le même sac.</p><p>Le premier qui trouve la bille bleue a gagné!</p><p><strong>C'est pas très juste:</strong> celui qui commence a beaucoup plus de chances! C'est pour ça qu'on tire au sort qui commence 🎲</p>`,
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: () => `<p class="quote">🏆 L'ordre de passage donne un <strong>avantage structurel</strong>.<br><strong>Être premier compte souvent plus que le talent.</strong></p>`
+          },
+          en: {
+            storyTitle: "📖 The Story - Competition",
+            story: (c, s, d) => {
+              const w = c.winsByPosition || [];
+              return `<p><strong>${c.playersPerGame}</strong> players around the same bag, taking turns (no replacement).</p>
+              <p>First to find the 🔵 = WINS! (${c.games?.toLocaleString() || 0} games played)</p>
+              <p>🥇 Player 1: <strong>${((w[0]||0)/(c.games||1)*100).toFixed(1)}%</strong> | 🥈 Player 2: <strong>${((w[1]||0)/(c.games||1)*100).toFixed(1)}%</strong> | 🥉 Player 3: <strong>${((w[2]||0)/(c.games||1)*100).toFixed(1)}%</strong></p>`;
+            },
+            distExp: () => `<strong>This chart shows which position wins most often.</strong> Player 1 has a huge advantage because they pick first! The further back in the order, the lower the chances.`,
+            cumulExp: () => `<strong>Cumulative wins by position.</strong> Early positions accumulate wins quickly. Later players almost never get their chance!`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c) => `<p>Imagine a game where ${c.playersPerGame} kids take turns picking from the same bag.</p><p>The first one to find the blue marble wins!</p><p><strong>It's not very fair:</strong> whoever goes first has much better chances! That's why we draw lots to see who starts 🎲</p>`,
+            moralTitle: "💡 What this teaches us",
+            moral: () => `<p class="quote">🏆 Turn order gives a <strong>structural advantage</strong>.<br><strong>Being first often matters more than skill.</strong></p>`
+          }
         },
-        getDistExplanation: (config, stats) => `
-          <strong>Ce graphique montre quelle position gagne le plus souvent.</strong>
-          Le joueur 1 a un avantage énorme car il pioche en premier!
-          Plus on est loin dans l'ordre, moins on a de chances.
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>Cumul des victoires par position.</strong>
-          On voit que les premières positions accumulent rapidement les victoires.
-          Les derniers joueurs n'ont presque jamais leur chance!
-        `,
-        getChildExplanation: (config, stats) => `
-          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-          <p>Imagine un jeu où ${config.playersPerGame} enfants piochent chacun leur tour dans le même sac.</p>
-          <p>Le premier qui trouve la bille bleue a gagné!</p>
-          <p><strong>C'est pas très juste:</strong> celui qui commence a beaucoup plus de chances! C'est pour ça qu'on tire au sort qui commence 🎲</p>
-        `,
-        getMoral: (config, stats) => `
-          <h2>💡 Ce que ça nous apprend</h2>
-          <p class="quote">
-            🏆 L'ordre de passage donne un <strong>avantage structurel</strong>.<br>
-            <strong>Être premier compte souvent plus que le talent.</strong>
-          </p>
-        `
-      },
-      streak: {
-        getStory: (config, stats, dist) => {
-          const luckyCount = dist.get(1) || 0;
-          const type = config.streakBonus > 0 ? 'augmente' : 'diminue';
-          return `
-            <h2>📖 L'Histoire - Streaks</h2>
-            <p>Probabilité de base: 1/${config.totalBalls}. Après chaque échec, elle <strong>${type} de ${Math.abs(config.streakBonus)}%</strong>!</p>
-            <p>${config.streakBonus > 0 ? '🔥 Main chaude: plus tu perds, plus tu as de chances!' : '❄️ Main froide: plus tu perds, plus c\'est dur...'}</p>
-            <p>🍀 ${luckyCount.toLocaleString()} au 1er coup | 😅 Max: ${stats.max.toLocaleString()} tentatives</p>
-          `;
+        streak: {
+          fr: {
+            storyTitle: "📖 L'Histoire - Streaks",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              const type = c.streakBonus > 0 ? 'augmente' : 'diminue';
+              return `<p>Probabilité de base: 1/${c.totalBalls}. Après chaque échec, elle <strong>${type} de ${Math.abs(c.streakBonus)}%</strong>!</p>
+              <p>${c.streakBonus > 0 ? '🔥 Main chaude: plus tu perds, plus tu as de chances!' : "❄️ Main froide: plus tu perds, plus c'est dur..."}</p>
+              <p>🍀 ${lucky.toLocaleString()} au 1er coup | 😅 Max: ${s.max.toLocaleString()} tentatives</p>`;
+            },
+            distExp: (c) => `<strong>${c.streakBonus > 0 ? 'Distribution compressée - moins de cas extrêmes.' : 'Distribution étalée - plus de cas extrêmes!'}</strong> ${c.streakBonus > 0 ? 'La probabilité croissante rattrape les malchanceux.' : 'La probabilité décroissante piège les malchanceux.'}`,
+            cumulExp: (c) => `<strong>${c.streakBonus > 0 ? 'Courbe plus pentue = convergence rapide.' : 'Courbe plus plate = convergence lente.'}</strong> ${c.streakBonus > 0 ? 'Tout le monde finit par gagner assez vite.' : 'Certains peuvent rester bloqués très longtemps!'}`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c) => `<p>${c.streakBonus > 0 ? 'Imagine que plus tu rates, plus le sac devient "gentil" et t\'aide à trouver la bille bleue!' : 'Imagine que plus tu rates, plus le sac devient "méchant" et cache encore mieux la bille bleue!'}</p><p><strong>Dans la vraie vie, chaque tirage est indépendant!</strong> Le sac n'a pas de mémoire 🧠</p><p>C'est ce qu'on appelle "l'erreur du joueur" - croire que la chance "doit tourner".</p>`,
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: () => `<p class="quote">🎲 Dans la vraie vie, chaque tirage est <strong>indépendant</strong>.<br><strong>Le hasard n'a pas de mémoire!</strong></p>`
+          },
+          en: {
+            storyTitle: "📖 The Story - Streaks",
+            story: (c, s, d) => {
+              const lucky = d.get(1) || 0;
+              const type = c.streakBonus > 0 ? 'increases' : 'decreases';
+              return `<p>Base probability: 1/${c.totalBalls}. After each failure, it <strong>${type} by ${Math.abs(c.streakBonus)}%</strong>!</p>
+              <p>${c.streakBonus > 0 ? '🔥 Hot hand: the more you lose, the better your chances!' : '❄️ Cold hand: the more you lose, the harder it gets...'}</p>
+              <p>🍀 ${lucky.toLocaleString()} on 1st try | 😅 Max: ${s.max.toLocaleString()} attempts</p>`;
+            },
+            distExp: (c) => `<strong>${c.streakBonus > 0 ? 'Compressed distribution - fewer extreme cases.' : 'Spread out distribution - more extreme cases!'}</strong> ${c.streakBonus > 0 ? 'Increasing probability catches up with the unlucky.' : 'Decreasing probability traps the unlucky.'}`,
+            cumulExp: (c) => `<strong>${c.streakBonus > 0 ? 'Steeper curve = fast convergence.' : 'Flatter curve = slow convergence.'}</strong> ${c.streakBonus > 0 ? 'Everyone ends up winning fairly quickly.' : 'Some can stay stuck for a very long time!'}`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c) => `<p>${c.streakBonus > 0 ? 'Imagine that the more you miss, the "nicer" the bag becomes and helps you find the blue marble!' : 'Imagine that the more you miss, the "meaner" the bag becomes and hides the blue marble even better!'}</p><p><strong>In real life, each draw is independent!</strong> The bag has no memory 🧠</p><p>This is called the "gambler's fallacy" - believing that luck "has to turn around".</p>`,
+            moralTitle: "💡 What this teaches us",
+            moral: () => `<p class="quote">🎲 In real life, each draw is <strong>independent</strong>.<br><strong>Randomness has no memory!</strong></p>`
+          }
         },
-        getDistExplanation: (config, stats) => `
-          <strong>${config.streakBonus > 0 ? 'Distribution compressée - moins de cas extrêmes.' : 'Distribution étalée - plus de cas extrêmes!'}</strong>
-          ${config.streakBonus > 0 ? 'La probabilité croissante rattrape les malchanceux.' : 'La probabilité décroissante piège les malchanceux.'}
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>${config.streakBonus > 0 ? 'Courbe plus pentue = convergence rapide.' : 'Courbe plus plate = convergence lente.'}</strong>
-          ${config.streakBonus > 0 ? 'Tout le monde finit par gagner assez vite.' : 'Certains peuvent rester bloqués très longtemps!'}
-        `,
-        getChildExplanation: (config, stats) => `
-          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-          <p>${config.streakBonus > 0
-            ? 'Imagine que plus tu rates, plus le sac devient "gentil" et t\'aide à trouver la bille bleue!'
-            : 'Imagine que plus tu rates, plus le sac devient "méchant" et cache encore mieux la bille bleue!'}</p>
-          <p><strong>Dans la vraie vie, chaque tirage est indépendant!</strong> Le sac n'a pas de mémoire 🧠</p>
-          <p>C'est ce qu'on appelle "l'erreur du joueur" - croire que la chance "doit tourner".</p>
-        `,
-        getMoral: (config, stats) => `
-          <h2>💡 Ce que ça nous apprend</h2>
-          <p class="quote">
-            🎲 Dans la vraie vie, chaque tirage est <strong>indépendant</strong>.<br>
-            <strong>Le hasard n'a pas de mémoire!</strong>
-          </p>
-        `
-      },
-      economy: {
-        getStory: (config, stats, dist) => {
-          const avgCost = stats.average * config.cost;
-          const profit = config.reward - avgCost;
-          const profitable = profit > 0;
-          return `
-            <h2>📖 L'Histoire - Économie</h2>
-            <p>Chaque essai coûte <span class="highlight">${config.cost}€</span>. Gagner rapporte <span class="highlight">${config.reward}€</span>!</p>
-            <p>💸 Coût moyen: <strong>${avgCost.toFixed(0)}€</strong> |
-               💰 Gain net: <strong style="color:${profitable ? '#4ade80' : '#f97316'}">${profit.toFixed(0)}€</strong></p>
-            <p>${profitable ? '📈 Jeu RENTABLE sur le long terme!' : '📉 Jeu PERDANT sur le long terme!'}</p>
-          `;
+        economy: {
+          fr: {
+            storyTitle: "📖 L'Histoire - Économie",
+            story: (c, s) => {
+              const avgCost = s.average * c.cost;
+              const profit = c.reward - avgCost;
+              const profitable = profit > 0;
+              return `<p>Chaque essai coûte <span class="highlight">${c.cost}€</span>. Gagner rapporte <span class="highlight">${c.reward}€</span>!</p>
+              <p>💸 Coût moyen: <strong>${avgCost.toFixed(0)}€</strong> | 💰 Gain net: <strong style="color:${profitable ? '#4ade80' : '#f97316'}">${profit.toFixed(0)}€</strong></p>
+              <p>${profitable ? '📈 Jeu RENTABLE sur le long terme!' : '📉 Jeu PERDANT sur le long terme!'}</p>`;
+            },
+            distExp: () => `<strong>Chaque barre = un coût différent pour le joueur.</strong> Les barres de gauche = joueurs chanceux (peu de dépenses). Les barres de droite = joueurs qui ont dépensé beaucoup!`,
+            cumulExp: () => `<strong>% de joueurs ayant "rentabilisé" selon leurs essais.</strong> Plus on est à droite, plus on a dépensé. La ligne pointillée serait le seuil de rentabilité.`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c, s) => {
+              const avgCost = s.average * c.cost;
+              const profitable = c.reward > avgCost;
+              return `<p>Imagine une machine où tu mets ${c.cost}€ à chaque essai. Si tu gagnes, tu reçois ${c.reward}€!</p><p>En moyenne, il faut ${s.average.toFixed(0)} essais pour gagner, donc dépenser ${avgCost.toFixed(0)}€.</p><p><strong>${profitable ? `Super! Tu gagnes ${(c.reward - avgCost).toFixed(0)}€ en moyenne! 🎉` : `Attention! Tu perds ${(avgCost - c.reward).toFixed(0)}€ en moyenne! C'est comme ça que les casinos gagnent de l'argent 💸`}</strong></p>`;
+            },
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: (c, s) => {
+              const avgCost = s.average * c.cost;
+              const profitable = c.reward > avgCost;
+              return `<p class="quote">${profitable ? '✅ Ce jeu est mathématiquement rentable.' : '❌ Ce jeu est mathématiquement perdant.'}<br><strong>L'espérance = ce que tu gagnes en moyenne sur le long terme.</strong></p>`;
+            }
+          },
+          en: {
+            storyTitle: "📖 The Story - Economy",
+            story: (c, s) => {
+              const avgCost = s.average * c.cost;
+              const profit = c.reward - avgCost;
+              const profitable = profit > 0;
+              return `<p>Each try costs <span class="highlight">${c.cost}€</span>. Winning earns <span class="highlight">${c.reward}€</span>!</p>
+              <p>💸 Average cost: <strong>${avgCost.toFixed(0)}€</strong> | 💰 Net profit: <strong style="color:${profitable ? '#4ade80' : '#f97316'}">${profit.toFixed(0)}€</strong></p>
+              <p>${profitable ? '📈 Game is PROFITABLE in the long run!' : '📉 Game is a LOSS in the long run!'}</p>`;
+            },
+            distExp: () => `<strong>Each bar = a different cost for the player.</strong> Left bars = lucky players (low spending). Right bars = players who spent a lot!`,
+            cumulExp: () => `<strong>% of players who "broke even" based on attempts.</strong> Further right = more spent. The dotted line would be the break-even point.`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c, s) => {
+              const avgCost = s.average * c.cost;
+              const profitable = c.reward > avgCost;
+              return `<p>Imagine a machine where you put ${c.cost}€ for each try. If you win, you get ${c.reward}€!</p><p>On average, it takes ${s.average.toFixed(0)} tries to win, so you spend ${avgCost.toFixed(0)}€.</p><p><strong>${profitable ? `Great! You win ${(c.reward - avgCost).toFixed(0)}€ on average! 🎉` : `Watch out! You lose ${(avgCost - c.reward).toFixed(0)}€ on average! That's how casinos make money 💸`}</strong></p>`;
+            },
+            moralTitle: "💡 What this teaches us",
+            moral: (c, s) => {
+              const avgCost = s.average * c.cost;
+              const profitable = c.reward > avgCost;
+              return `<p class="quote">${profitable ? '✅ This game is mathematically profitable.' : '❌ This game is mathematically a loss.'}<br><strong>Expected value = what you win on average in the long run.</strong></p>`;
+            }
+          }
         },
-        getDistExplanation: (config, stats) => `
-          <strong>Chaque barre = un coût différent pour le joueur.</strong>
-          Les barres de gauche = joueurs chanceux (peu de dépenses).
-          Les barres de droite = joueurs qui ont dépensé beaucoup!
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>% de joueurs ayant "rentabilisé" selon leurs essais.</strong>
-          Plus on est à droite, plus on a dépensé.
-          La ligne pointillée serait le seuil de rentabilité.
-        `,
-        getChildExplanation: (config, stats) => {
-          const avgCost = stats.average * config.cost;
-          const profitable = config.reward > avgCost;
-          return `
-            <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-            <p>Imagine une machine où tu mets ${config.cost}€ à chaque essai. Si tu gagnes, tu reçois ${config.reward}€!</p>
-            <p>En moyenne, il faut ${stats.average.toFixed(0)} essais pour gagner, donc dépenser ${avgCost.toFixed(0)}€.</p>
-            <p><strong>${profitable
-              ? `Super! Tu gagnes ${(config.reward - avgCost).toFixed(0)}€ en moyenne! 🎉`
-              : `Attention! Tu perds ${(avgCost - config.reward).toFixed(0)}€ en moyenne! C'est comme ça que les casinos gagnent de l'argent 💸`
-            }</strong></p>
-          `;
-        },
-        getMoral: (config, stats) => {
-          const avgCost = stats.average * config.cost;
-          const profitable = config.reward > avgCost;
-          return `
-            <h2>💡 Ce que ça nous apprend</h2>
-            <p class="quote">
-              ${profitable ? '✅ Ce jeu est mathématiquement rentable.' : '❌ Ce jeu est mathématiquement perdant.'}<br>
-              <strong>L'espérance = ce que tu gagnes en moyenne sur le long terme.</strong>
-            </p>
-          `;
+        multi: {
+          fr: {
+            storyTitle: "📖 L'Histoire - Multi-cibles",
+            story: (c, s) => `<p>Il faut trouver <span class="highlight">${c.targetBalls} boules bleues</span>! (avec remise)</p>
+              <p>Moyenne théorique: ~${(c.totalBalls * c.targetBalls).toLocaleString()} tentatives</p>
+              <p>🍀 Min: <strong>${s.min}</strong> | 📊 Moyenne: <strong>${s.average.toFixed(0)}</strong> | 😅 Max: <strong>${s.max.toLocaleString()}</strong></p>`,
+            distExp: (c) => `<strong>Distribution décalée vers la droite.</strong> Plus on cherche de boules, plus le "pic" se déplace. C'est la somme de ${c.targetBalls} distributions géométriques!`,
+            cumulExp: (c, s, p50) => `<strong>Courbe plus "S" que pour une seule boule.</strong> Le début est plus plat (impossible de finir très vite). 50% réussissent en ~${p50} tentatives.`,
+            childTitle: "🧒 Expliqué à un enfant de 8 ans",
+            child: (c, s) => `<p>Au lieu de chercher 1 bille bleue, tu dois en trouver ${c.targetBalls}!</p><p>C'est ${c.targetBalls}x plus long en moyenne. Mais parfois BEAUCOUP plus pour les malchanceux (${s.max.toLocaleString()} essais!).</p><p><strong>Plus l'objectif est grand, plus les écarts entre chanceux et malchanceux sont énormes!</strong></p>`,
+            moralTitle: "💡 Ce que ça nous apprend",
+            moral: () => `<p class="quote">📈 Objectifs multiples = temps × N mais variance × N²<br><strong>Les grands objectifs amplifient les inégalités.</strong></p>`
+          },
+          en: {
+            storyTitle: "📖 The Story - Multi-target",
+            story: (c, s) => `<p>You need to find <span class="highlight">${c.targetBalls} blue balls</span>! (with replacement)</p>
+              <p>Theoretical average: ~${(c.totalBalls * c.targetBalls).toLocaleString()} attempts</p>
+              <p>🍀 Min: <strong>${s.min}</strong> | 📊 Average: <strong>${s.average.toFixed(0)}</strong> | 😅 Max: <strong>${s.max.toLocaleString()}</strong></p>`,
+            distExp: (c) => `<strong>Distribution shifted to the right.</strong> The more balls you're looking for, the more the "peak" shifts. It's the sum of ${c.targetBalls} geometric distributions!`,
+            cumulExp: (c, s, p50) => `<strong>More "S-shaped" curve than for a single ball.</strong> The beginning is flatter (impossible to finish very quickly). 50% succeed in ~${p50} attempts.`,
+            childTitle: "🧒 Explained to an 8-year-old",
+            child: (c, s) => `<p>Instead of looking for 1 blue marble, you need to find ${c.targetBalls}!</p><p>It takes ${c.targetBalls}x longer on average. But sometimes MUCH more for the unlucky ones (${s.max.toLocaleString()} tries!).</p><p><strong>The bigger the goal, the larger the gap between lucky and unlucky people!</strong></p>`,
+            moralTitle: "💡 What this teaches us",
+            moral: () => `<p class="quote">📈 Multiple goals = time × N but variance × N²<br><strong>Big goals amplify inequalities.</strong></p>`
+          }
         }
-      },
-      multi: {
-        getStory: (config, stats, dist) => {
-          return `
-            <h2>📖 L'Histoire - Multi-cibles</h2>
-            <p>Il faut trouver <span class="highlight">${config.targetBalls} boules bleues</span>! (avec remise)</p>
-            <p>Moyenne théorique: ~${(config.totalBalls * config.targetBalls).toLocaleString()} tentatives</p>
-            <p>🍀 Min: <strong>${stats.min}</strong> | 📊 Moyenne: <strong>${stats.average.toFixed(0)}</strong> | 😅 Max: <strong>${stats.max.toLocaleString()}</strong></p>
-          `;
-        },
-        getDistExplanation: (config, stats) => `
-          <strong>Distribution décalée vers la droite.</strong>
-          Plus on cherche de boules, plus le "pic" se déplace.
-          C'est la somme de ${config.targetBalls} distributions géométriques!
-        `,
-        getCumulExplanation: (config, stats, p50, p90) => `
-          <strong>Courbe plus "S" que pour une seule boule.</strong>
-          Le début est plus plat (impossible de finir très vite).
-          50% réussissent en ~${p50} tentatives.
-        `,
-        getChildExplanation: (config, stats) => `
-          <h2>🧒 Expliqué à un enfant de 8 ans</h2>
-          <p>Au lieu de chercher 1 bille bleue, tu dois en trouver ${config.targetBalls}!</p>
-          <p>C'est ${config.targetBalls}x plus long en moyenne. Mais parfois BEAUCOUP plus pour les malchanceux (${stats.max.toLocaleString()} essais!).</p>
-          <p><strong>Plus l'objectif est grand, plus les écarts entre chanceux et malchanceux sont énormes!</strong></p>
-        `,
-        getMoral: (config, stats) => `
-          <h2>💡 Ce que ça nous apprend</h2>
-          <p class="quote">
-            📈 Objectifs multiples = temps × N mais variance × N²<br>
-            <strong>Les grands objectifs amplifient les inégalités.</strong>
-          </p>
-        `
+      };
+      return content[mode]?.[currentLang] || content[mode]?.fr;
+    }
+
+    const modeContent = {
+      get(mode) {
+        const c = getModeContent(mode);
+        return {
+          getStory: (config, stats, dist) => `<h2>${c.storyTitle}</h2>${c.story(config, stats, dist)}`,
+          getDistExplanation: (config, stats) => c.distExp(config, stats),
+          getCumulExplanation: (config, stats, p50, p90) => c.cumulExp(config, stats, p50, p90),
+          getChildExplanation: (config, stats) => `<h2>${c.childTitle}</h2>${c.child(config, stats)}`,
+          getMoral: (config, stats) => `<h2>${c.moralTitle}</h2>${c.moral(config, stats)}`
+        };
       }
     };
 
@@ -870,14 +1010,15 @@
       }
 
       const luckyCount = distribution.get(1) || distribution.get(stats.min) || 0;
+      const s = t('ui.stats');
 
       document.getElementById('statsGrid').innerHTML = `
-        <div class="stat-card lucky"><div class="value">🍀 ${luckyCount.toLocaleString()}</div><div class="label">Chanceux</div></div>
-        <div class="stat-card unlucky"><div class="value">😅 ${stats.max.toLocaleString()}</div><div class="label">Max</div></div>
-        <div class="stat-card"><div class="value">${stats.average.toFixed(0)}</div><div class="label">Moyenne</div></div>
-        <div class="stat-card"><div class="value">${stats.median}</div><div class="label">Médiane</div></div>
-        <div class="stat-card"><div class="value">${p50}</div><div class="label">50% en ≤</div></div>
-        <div class="stat-card"><div class="value">${p90}</div><div class="label">90% en ≤</div></div>
+        <div class="stat-card lucky"><div class="value">🍀 ${luckyCount.toLocaleString()}</div><div class="label">${s.lucky}</div></div>
+        <div class="stat-card unlucky"><div class="value">😅 ${stats.max.toLocaleString()}</div><div class="label">${s.max}</div></div>
+        <div class="stat-card"><div class="value">${stats.average.toFixed(0)}</div><div class="label">${s.average}</div></div>
+        <div class="stat-card"><div class="value">${stats.median}</div><div class="label">${s.median}</div></div>
+        <div class="stat-card"><div class="value">${p50}</div><div class="label">${s.p50}</div></div>
+        <div class="stat-card"><div class="value">${p90}</div><div class="label">${s.p90}</div></div>
       `;
 
       return { p50, p90 };
@@ -888,7 +1029,7 @@
       const progressBar = document.getElementById('progressBar');
 
       btn.disabled = true;
-      btn.textContent = '⏳ Simulation...';
+      btn.textContent = t('ui.runningBtn');
       progressBar.classList.add('visible');
       progressBar.querySelector('.fill').style.width = '30%';
 
@@ -916,7 +1057,7 @@
 
       progressBar.querySelector('.fill').style.width = '100%';
 
-      const content = modeContent[currentMode];
+      const content = modeContent.get(currentMode);
       document.getElementById('storyBox').innerHTML = content.getStory(config, stats, distribution);
       document.getElementById('distExplanation').innerHTML = content.getDistExplanation(config, stats);
       document.getElementById('cumulExplanation').innerHTML = content.getCumulExplanation(config, stats, p50, p90);
@@ -929,7 +1070,7 @@
       document.getElementById('results').classList.add('visible');
 
       btn.disabled = false;
-      btn.textContent = '▶️ Lancer la simulation';
+      btn.textContent = t('ui.runBtn');
       setTimeout(() => progressBar.classList.remove('visible'), 500);
     }
 
@@ -938,9 +1079,20 @@
       btn.addEventListener('click', () => selectMode(btn.dataset.mode));
     });
 
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentLang = btn.dataset.lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+        document.documentElement.lang = currentLang;
+        updateStaticUI();
+      });
+    });
+
     document.getElementById('runBtn').addEventListener('click', runSimulation);
 
+    // Initialize
     selectMode('replacement');
+    updateStaticUI();
   </script>
 </body>
 </html>
